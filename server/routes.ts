@@ -35,26 +35,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use(cookieParser());
 
   // Serve in-memory uploaded files
-  app.get("/uploads/*", (req, res) => {
-    const fileName = req.params[0];
-    const buffer = (fileStorage as any).getFile?.(fileName);
-    
-    if (!buffer) {
-      return res.status(404).json({ message: "File not found" });
+  app.get("/uploads/*", async (req, res) => {
+    try {
+      const fileName = req.params[0];
+      const buffer = await fileStorage.getFile(fileName);
+      
+      if (!buffer) {
+        return res.status(404).json({ message: "File not found" });
+      }
+
+      // Set appropriate content type based on file extension
+      const ext = fileName.split('.').pop()?.toLowerCase();
+      const contentType = {
+        'pdf': 'application/pdf',
+        'html': 'text/html',
+        'jpg': 'image/jpeg',
+        'jpeg': 'image/jpeg',
+        'png': 'image/png'
+      }[ext || ''] || 'application/octet-stream';
+
+      res.set('Content-Type', contentType);
+      res.send(buffer);
+    } catch (error) {
+      console.error('File serving error:', error);
+      res.status(500).json({ message: "Failed to serve file" });
     }
-
-    // Set appropriate content type based on file extension
-    const ext = fileName.split('.').pop()?.toLowerCase();
-    const contentType = {
-      'pdf': 'application/pdf',
-      'html': 'text/html',
-      'jpg': 'image/jpeg',
-      'jpeg': 'image/jpeg',
-      'png': 'image/png'
-    }[ext || ''] || 'application/octet-stream';
-
-    res.set('Content-Type', contentType);
-    res.send(buffer);
   });
 
   // Add CSRF protection header requirement for admin routes
@@ -178,15 +183,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Extract text from all files by re-processing them
-      // In a real implementation, you might store the extracted text
       let corpus = `Report Title: ${report.title}\n\n`;
-      
-      // For now, we'll create a simulated corpus based on file metadata
-      // In production, you'd fetch the actual files and extract text
-      report.files.forEach((fileItem, index) => {
-        corpus += `File ${index + 1}: ${fileItem.file_name} (${fileItem.type})\n`;
-        corpus += `[Content extracted from ${fileItem.type} file would be here]\n\n`;
-      });
+      let extractedTexts = [];
+
+      // Process each file to extract text content
+      for (const fileItem of report.files) {
+        try {
+          // Fetch the file from storage
+          const fileName = fileItem.url.replace('uploads/', '');
+          const fileBuffer = await fileStorage.getFile(fileName);
+          if (fileBuffer) {
+            // Create a mock file object for text extraction
+            const mockFile = {
+              buffer: fileBuffer,
+              originalname: fileItem.file_name,
+              mimetype: fileItem.type
+            } as Express.Multer.File;
+            
+            const extractedText = await extractText(mockFile);
+            extractedTexts.push(`File: ${fileItem.file_name}\n${extractedText}`);
+          } else {
+            // Fallback to metadata if file can't be retrieved
+            extractedTexts.push(`File: ${fileItem.file_name} (${fileItem.type})\n[File content not accessible for analysis]\n`);
+          }
+        } catch (error) {
+          console.error(`Failed to extract text from ${fileItem.file_name}:`, error);
+          // Continue with other files
+          extractedTexts.push(`File: ${fileItem.file_name} (${fileItem.type})\n[Text extraction failed]\n`);
+        }
+      }
+
+      corpus += extractedTexts.join('\n\n');
 
       if (!corpus.trim()) {
         return res.status(400).json({ message: "No text content available for analysis" });
@@ -199,13 +226,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       await storage.updateReport(reportId, {
         ai_json: aiJson,
         ai_markdown: aiMarkdown,
-        score: aiJson.score.toString(),
+        score: aiJson.score?.toString() || "0",
         status: "analyzed"
       });
 
       res.json({
         message: "Analysis completed successfully",
-        score: aiJson.score
+        score: aiJson.score || 0,
+        ai_json: aiJson,
+        ai_markdown: aiMarkdown
       });
     } catch (error) {
       console.error("Analysis error:", error);

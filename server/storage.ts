@@ -15,6 +15,7 @@ export interface IStorage {
 export interface IFileStorage {
   uploadFile(file: Express.Multer.File, reportId: number): Promise<FileItem>;
   deleteFile(url: string): Promise<void>;
+  getFile(fileName: string): Promise<Buffer | null>; // Added getFile method signature
 }
 
 export class DatabaseStorage implements IStorage {
@@ -94,7 +95,7 @@ export class MemStorage implements IStorage {
   async updateReport(id: number, updates: Partial<Report>): Promise<Report | undefined> {
     const existing = this.reports.get(id);
     if (!existing) return undefined;
-    
+
     const updated: Report = {
       ...existing,
       ...updates,
@@ -115,12 +116,12 @@ export class MemoryFileStorage implements IFileStorage {
   async uploadFile(file: Express.Multer.File, reportId: number): Promise<FileItem> {
     const fileName = `${reportId}/${Date.now()}-${file.originalname}`;
     const url = `/uploads/${fileName}`;
-    
+
     // Store file buffer in memory
     this.files.set(fileName, file.buffer);
-    
+
     const fileType = this.getFileType(file.mimetype);
-    
+
     return {
       type: fileType,
       url,
@@ -135,8 +136,8 @@ export class MemoryFileStorage implements IFileStorage {
   }
 
   // Method to serve files (for Express route)
-  getFile(fileName: string): Buffer | undefined {
-    return this.files.get(fileName);
+  async getFile(fileName: string): Promise<Buffer | null> {
+    return this.files.get(fileName) || null;
   }
 
   private getFileType(mimetype: string): "html" | "pdf" | "image" {

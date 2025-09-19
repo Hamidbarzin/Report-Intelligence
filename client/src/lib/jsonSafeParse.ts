@@ -25,3 +25,48 @@ export function jsonSafeParse(jsonString: string): any {
     }
   }
 }
+import { AnalysisSchema } from "@shared/analysisSchema";
+
+export function jsonSafeParse(raw: string): any {
+  try {
+    return JSON.parse(raw);
+  } catch (error) {
+    // Try basic repairs
+    try {
+      let repaired = raw
+        .replace(/,\s*}/g, '}')  // Remove trailing commas in objects
+        .replace(/,\s*]/g, ']')  // Remove trailing commas in arrays
+        .replace(/'/g, '"')      // Replace single quotes with double quotes
+        .replace(/([{,]\s*)(\w+):/g, '$1"$2":'); // Add quotes to unquoted keys
+      
+      return JSON.parse(repaired);
+    } catch (repairError) {
+      console.error('Failed to parse JSON:', error);
+      // Return a default structure that matches the schema
+      return getDefaultAnalysisData();
+    }
+  }
+}
+
+function getDefaultAnalysisData() {
+  return {
+    report_id: "unknown",
+    timeframe: { start: new Date().toISOString().split('T')[0], end: new Date().toISOString().split('T')[0] },
+    kpis: [],
+    trend_summary: "Analysis data not available",
+    insights: [],
+    score: 0,
+    charts: [],
+    next_month_plan: {
+      focus_themes: [],
+      weekly_plan: [
+        { week: 1, goals: [], metrics: [], owner: "" },
+        { week: 2, goals: [], metrics: [], owner: "" },
+        { week: 3, goals: [], metrics: [], owner: "" },
+        { week: 4, goals: [], metrics: [], owner: "" }
+      ],
+      milestones: [],
+      risks_mitigations: []
+    }
+  };
+}
