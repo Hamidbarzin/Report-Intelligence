@@ -1,0 +1,161 @@
+You are a senior full-stack engineer. The app is mostly built, but FOUR core features are missing:
+1) Executive Summary
+2) KPIs + trends + progress score (0–100)
+3) Growth/Progress charts
+4) One-month action plan (weekly goals + milestones)
+
+Do NOT change existing styling/UX. Only add what’s required. Keep all uploads, storage, and list views working.
+
+### Files to ADD/UPDATE
+- /api/analyze.js                // serverless endpoint to run LLM, return ai_json + ai_markdown
+- /src/lib/schema.js             // JSON schema definition
+- /src/lib/aiClient.js           // LLM call helper + jsonSafeParse
+- /src/components/SummaryTab.jsx // renders executive summary (markdown)
+- /src/components/KPIsTab.jsx    // renders KPI cards + trends + score
+- /src/components/ChartsBoard.jsx// renders charts from ai_json using Recharts
+- /src/components/PlanView.jsx   // renders 1-month plan (weeks 1-4, milestones)
+- (Wire these tabs into the existing Report View route)
+
+### Strict JSON Schema (store in /src/lib/schema.js)
+export const AnalysisSchema = {
+  "type": "object",
+  "required": ["report_id","timeframe","kpis","trend_summary","insights","score","charts","next_month_plan"],
+  "properties": {
+    "report_id": {"type":"string"},
+    "timeframe": {"type":"object","properties":{"start":{"type":"string"},"end":{"type":"string"}}},
+    "kpis": {
+      "type":"array",
+      "items":{"type":"object","required":["name","value"],"properties":{
+        "name":{"type":"string"},
+        "value":{"type":"number"},
+        "unit":{"type":"string"},
+        "target":{"type":"number"},
+        "delta":{"type":"number"} // vs previous period
+      }}
+    },
+    "trend_summary":{"type":"string"},
+    "insights":{"type":"array","items":{"type":"object","properties":{
+      "type":{"type":"string","enum":["win","risk","issue","opportunity"]},
+      "text":{"type":"string"}
+    }}},
+    "score":{"type":"number","minimum":0,"maximum":100},
+    "charts":{
+      "type":"array",
+      "items":{"type":"object","required":["title","type","series"],"properties":{
+        "title":{"type":"string"},
+        "type":{"type":"string","enum":["line","bar","pie"]},
+        "series":{"type":"array","items":{
+          "type":"object","required":["name","points"],
+          "properties":{"name":{"type":"string"},"points":{"type":"array","items":{
+            "type":"object","required":["x","y"],
+            "properties":{"x":{"type":"string"},"y":{"type":"number"}}
+          }}}
+        }}
+      }}
+    },
+    "next_month_plan":{
+      "type":"object",
+      "required":["focus_themes","weekly_plan","milestones","risks_mitigations"],
+      "properties":{
+        "focus_themes":{"type":"array","items":{"type":"string"}},
+        "weekly_plan":{"type":"array","minItems":4,"maxItems":4,"items":{"type":"object","properties":{
+          "week":{"type":"number"},
+          "goals":{"type":"array","items":{"type":"string"}},
+          "metrics":{"type":"array","items":{"type":"string"}},
+          "owner":{"type":"string"}
+        }}}},
+        "milestones":{"type":"array","items":{"type":"object","properties":{
+          "title":{"type":"string"},
+          "due":{"type":"string"}
+        }}}},
+        "risks_mitigations":{"type":"array","items":{"type":"object","properties":{
+          "risk":{"type":"string"},
+          "mitigation":{"type":"string"}
+        }}}}
+    }
+  }
+};
+
+### /src/lib/aiClient.js
+- Export `callLLM({corpus, meta})` that:
+  - Calls vision/JSON LLM on server (never expose API key to client)
+  - Prompts: “OUTPUT STRICT JSON ONLY per AnalysisSchema. No prose.”
+  - Returns `{ ai_json, ai_markdown }`
+- Implement `jsonSafeParse(raw)`:
+  1) try JSON.parse
+  2) if fail: small repairs (remove trailing commas, fix quotes)
+  3) if still fail: ask LLM to repair to valid JSON per schema
+- Validate against AnalysisSchema; if invalid, set defaults but keep required structure.
+
+### /api/analyze.js (serverless)
+- `POST /api/analyze` input: `{ reportId, corpus, meta }`
+- Use `callLLM` to get `{ ai_json, ai_markdown }`
+- Persist to DB (Supabase) on `reports`:
+  - fields: ai_json, ai_markdown, score (from ai_json), updated_at = now()
+- Return `{ ok:true, ai_json, ai_markdown }`
+- Handle errors (400/500)
+
+### UI Wiring (minimal)
+- Report page: add tabs “Summary”, “KPIs”, “Charts”, “Plan”
+- SummaryTab.jsx: render `ai_markdown` (use a markdown renderer)
+- KPIsTab.jsx:
+  - Map `ai_json.kpis` → cards: name, value+unit, delta (▲/▼), target
+  - Show `ai_json.score` big badge (0–100)
+  - Show `trend_summary` + `insights`
+- ChartsBoard.jsx:
+  - Use **Recharts**; for each `charts[]` item:
+    - line/bar: map series[].points → { x, y }
+    - pie: map to name/value from points
+- PlanView.jsx:
+  - List `focus_themes`
+  - Weekly plan (weeks 1..4): goals + metrics + owner
+  - Milestones table with due dates
+  - Risks/mitigations list
+- If `ai_json` is missing, show a button “Analyze with AI” → calls `POST /api/analyze` then refreshes.
+
+### Minimal Samples (for dev testing)
+Use this sample `ai_json` to render before LLM is wired:
+{
+  "report_id":"seed",
+  "timeframe":{"start":"2025-08-15","end":"2025-09-15"},
+  "kpis":[
+    {"name":"Orders","value":120,"unit":"","target":150,"delta":+15},
+    {"name":"On-time %","value":92,"unit":"%","target":95,"delta":+3},
+    {"name":"Revenue","value":42000,"unit":"CAD","target":50000,"delta":+8000}
+  ],
+  "trend_summary":"Growth in orders and revenue; slight gap to targets.",
+  "insights":[
+    {"type":"win","text":"Same-day delivery uptake rose 18%"},
+    {"type":"risk","text":"Driver availability on weekends is tight"}
+  ],
+  "score":82,
+  "charts":[
+    {"title":"Orders per week","type":"line","series":[{"name":"Orders","points":[
+      {"x":"2025-08-18","y":22},{"x":"2025-08-25","y":27},{"x":"2025-09-01","y":31},{"x":"2025-09-08","y":40}
+    ]}]},
+    {"title":"Revenue","type":"bar","series":[{"name":"CAD","points":[
+      {"x":"2025-08-18","y":9000},{"x":"2025-08-25","y":10000},{"x":"2025-09-01","y":11000},{"x":"2025-09-08","y":12000}
+    ]}]}
+  ],
+  "next_month_plan":{
+    "focus_themes":["On-time rate","B2B partnerships","Cost per delivery"],
+    "weekly_plan":[
+      {"week":1,"goals":["Audit late routes","Pilot SMS ETA"],"metrics":["late%","ETA open%"],"owner":"Ops"},
+      {"week":2,"goals":["Sign 2 partners","Bundle pricing"],"metrics":["partners","ARPU"],"owner":"Sales"},
+      {"week":3,"goals":["Optimize dispatch"],"metrics":["cost/stop","utilization%"],"owner":"Ops"},
+      {"week":4,"goals":["Review targets","QBR deck"],"metrics":["score","target gap"],"owner":"Exec"}
+    ],
+    "milestones":[{"title":"2 B2B contracts","due":"2025-10-10"}],
+    "risks_mitigations":[{"risk":"Weekend capacity","mitigation":"Hire 2 PT drivers"}]
+  }
+}
+
+### Acceptance Criteria (must pass)
+- After clicking **Analyze with AI**, /api/analyze returns `{ ai_json, ai_markdown }` and DB stores them.
+- Report page shows:
+  - **Executive Summary** (markdown rendered)
+  - **KPI cards** with delta arrows and a **score badge (0–100)**
+  - **Charts** render with Recharts for all `charts[]`
+  - **One-month plan** with 4 weeks + milestones + risks/mitigations
+- No CSS/regression to existing UI.
+- Works on local and Vercel builds.
