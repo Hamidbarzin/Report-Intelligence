@@ -2,10 +2,20 @@ import OpenAI from "openai";
 import type { AIAnalysis } from "@shared/schema";
 import { jsonSafeParse } from "./jsonSafeParse";
 
-// the newest OpenAI model is "gpt-5" which was released August 7, 2025. do not change this unless explicitly requested by the user
-const openai = new OpenAI({ 
-  apiKey: process.env.OPENAI_API_KEY || process.env.LLM_API_KEY 
-});
+// Lazy initialization to avoid startup crashes
+let openai: OpenAI | null = null;
+
+function getOpenAI(): OpenAI {
+  if (!openai) {
+    const apiKey = process.env.OPENAI_API_KEY || process.env.LLM_API_KEY;
+    if (!apiKey) {
+      throw new Error("OpenAI API key not configured. Please set OPENAI_API_KEY environment variable.");
+    }
+    // the newest OpenAI model is "gpt-5" which was released August 7, 2025. do not change this unless explicitly requested by the user
+    openai = new OpenAI({ apiKey });
+  }
+  return openai;
+}
 
 const AI_ANALYSIS_SCHEMA = {
   type: "object",
@@ -121,7 +131,8 @@ The analysis must include:
 Ensure all data points are realistic and actionable based on the provided content.`;
 
   try {
-    const response = await openai.chat.completions.create({
+    const client = getOpenAI();
+    const response = await client.chat.completions.create({
       model: "gpt-5",
       messages: [{ role: "user", content: prompt }],
       response_format: { type: "json_object" }
@@ -145,7 +156,8 @@ Ensure all data points are realistic and actionable based on the provided conten
 
 export async function analyzeImage(base64Image: string): Promise<string> {
   try {
-    const response = await openai.chat.completions.create({
+    const client = getOpenAI();
+    const response = await client.chat.completions.create({
       model: "gpt-5",
       messages: [
         {

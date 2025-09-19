@@ -1,6 +1,20 @@
 import { JSDOM } from "jsdom";
-import pdf from "pdf-parse";
 import { analyzeImage } from "./ai";
+
+// Lazy import pdf-parse to avoid startup issues
+let pdfParse: any = null;
+async function getPdfParse() {
+  if (!pdfParse) {
+    try {
+      const pdfModule = await import("pdf-parse");
+      pdfParse = pdfModule.default;
+    } catch (error) {
+      console.warn("pdf-parse not available:", error);
+      pdfParse = null;
+    }
+  }
+  return pdfParse;
+}
 
 export async function extractText(file: Express.Multer.File): Promise<string> {
   switch (file.mimetype) {
@@ -37,7 +51,12 @@ function extractFromHTML(buffer: Buffer): string {
 
 async function extractFromPDF(buffer: Buffer): Promise<string> {
   try {
-    const data = await pdf(buffer);
+    const pdfParser = await getPdfParse();
+    if (!pdfParser) {
+      console.warn("PDF parser not available, falling back to OCR");
+      return extractFromImage(buffer);
+    }
+    const data = await pdfParser(buffer);
     return data.text;
   } catch (error) {
     // If PDF parsing fails, fall back to OCR via AI vision

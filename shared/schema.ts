@@ -1,12 +1,12 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, bigint, timestamptz, numeric, jsonb, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, bigint, timestamp, numeric, jsonb, boolean } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 export const reports = pgTable("reports", {
   id: bigint("id", { mode: "number" }).primaryKey().generatedByDefaultAsIdentity(),
   title: text("title").notNull(),
-  upload_date: timestamptz("upload_date").defaultNow().notNull(),
+  upload_date: timestamp("upload_date").defaultNow().notNull(),
   size_kb: numeric("size_kb").notNull(),
   extracted_date: text("extracted_date"),
   status: text("status", { enum: ["uploaded", "analyzed", "published"] }).default("uploaded").notNull(),
@@ -15,7 +15,7 @@ export const reports = pgTable("reports", {
   ai_json: jsonb("ai_json").$type<AIAnalysis | null>(),
   ai_markdown: text("ai_markdown"),
   score: numeric("score"),
-  updated_at: timestamptz("updated_at").defaultNow().notNull(),
+  updated_at: timestamp("updated_at").defaultNow().notNull(),
   is_published: boolean("is_published").default(false).notNull()
 });
 
