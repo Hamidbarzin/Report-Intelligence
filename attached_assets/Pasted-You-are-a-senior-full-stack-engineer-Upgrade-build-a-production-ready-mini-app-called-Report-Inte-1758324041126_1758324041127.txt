@@ -1,0 +1,99 @@
+You are a senior full-stack engineer. Upgrade/build a production-ready mini-app called **Report Intelligence** with these strict rules:
+
+GOAL
+- Only **admin** can upload/manage reports.
+- **Everyone** (public) can view reports read-only across any browser/device.
+- Reports can be HTML/PDF/Images, analyzed by AI to produce a Final Report (summary, KPIs, charts, 1-month plan).
+
+STACK
+- React 18 + Vite + Tailwind (frontend)
+- Serverless API (Vercel `/api/*`) with Node 18+ (also provide optional Express entry point)
+- Supabase: Postgres (metadata) + Storage (original files and generated outputs)
+- Recharts for charts
+- LocalStorage optional (cache for faster loads), but **source of truth is Supabase**
+- AI: provider-agnostic LLM (vision + JSON). Read key from server env.
+
+AUTH & ACCESS CONTROL (admin-only uploads)
+- Create **/admin** route (login form).
+- ENV: `ADMIN_PASSWORD`, `JWT_SECRET`
+- Endpoint `POST /api/login`: verify `ADMIN_PASSWORD`; if ok, set **HttpOnly, Secure, SameSite=Strict** cookie `ri_admin` containing a signed JWT `{ role:"admin" }` with 24h expiry.
+- Utility `requireAdmin(req)` verifies the cookie/JWT; return 401 on failure.
+- Protect admin endpoints with `requireAdmin`: `/api/upload`, `/api/delete`, `/api/publish`, `/api/reanalyze`.
+- Public endpoints (read-only): `/api/list`, `/api/report/:id` (published only).
+- Client: show upload/admin UI **only** when `/api/me` returns `{ role:"admin" }`. Never rely on client-side checks for security.
+
+DATA MODEL (Supabase)
+- Table `reports`:
+  - `id` bigint PK
+  - `title` text
+  - `upload_date` timestamptz
+  - `size_kb` numeric
+  - `extracted_date` text
+  - `status` text CHECK IN ('uploaded','analyzed','published')
+  - `content_url` text       // public URL for compiled HTML/PDF if generated
+  - `files` jsonb            // array of file items {type:'html'|'pdf'|'image', url, file_name, size_kb}
+  - `ai_json` jsonb          // strict schema output
+  - `ai_markdown` text       // executive summary
+  - `score` numeric
+  - `updated_at` timestamptz DEFAULT now()
+  - `is_published` boolean DEFAULT false
+- Storage bucket `reports_files` for original uploads and generated outputs.
+- Index on `updated_at DESC`, and partial index on `is_published=true`.
+
+ENDPOINTS
+- `POST /api/login` → set cookie
+- `GET /api/me` → {role:'admin'|'public'}
+- `POST /api/upload` (admin): accepts multiple files (.html, .pdf, .jpg/.jpeg/.png); uploads to bucket; creates DB row; returns `{reportId, files[]}`
+- `POST /api/analyze` (admin): runs AI on merged corpus; saves `ai_json` + `ai_markdown` + `score`
+- `POST /api/publish` (admin): sets `is_published=true` (visible to public)
+- `DELETE /api/delete/:id` (admin): delete DB row + bucket files
+- `GET /api/list` (public): list of published reports (id, title, dates, score, status)
+- `GET /api/report/:id` (public): full published report (metadata + ai_json + markdown + file urls)
+
+AI PIPELINE
+- Extract text:
+  - HTML: sanitize and strip tags; capture `<title>`
+  - PDF: server-side text extraction (pdf-parse or pdfjs); fallback OCR via AI vision for scanned PDFs
+  - Images: OCR via AI vision
+- Merge all text to `corpus`.
+- Call LLM (vision+JSON) with a strict **JSON schema** (kpis[], trend_summary, insights[], score, charts[], next_month_plan{weekly_plan[1..4], milestones[], risks_mitigations[]}). Return **valid JSON only**.
+- Implement `jsonSafeParse` with repair step if model returns near-JSON.
+- Save `ai_json` and `ai_markdown` to DB.
+
+FRONTEND UI (public-first)
+- Routes:
+  - `/` Dashboard (public): grid of **published** reports (cards: title, date, score, status). Search & filter.
+  - `/r/:id` Report View (public): Tabs → Summary (render markdown), KPIs, Charts (Recharts), Plan, Files (previews/links).
+  - `/admin` Admin Panel (login + after login tabs: Upload, Analyze, Publish, Manage).
+- Upload UI only inside `/admin` after auth.
+- Keep Tailwind clean cards (rounded-2xl, soft shadows). RTL/LTR toggle.
+- Export: buttons to download Final Report as HTML/PDF and export JSON (admin & public if published).
+
+SECURITY
+- Server-only LLM calls; keys never exposed to client.
+- Same-origin fetch; CORS disabled.
+- Sanitize HTML previews (DOMPurify).
+- File size limit (e.g., 20MB), friendly errors.
+- CSRF: SameSite=Strict cookie + require `X-Requested-With: XMLHttpRequest` header for admin POSTs.
+
+CONFIG & DEVOPS
+- `.env.example`: `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`, `ADMIN_PASSWORD`, `JWT_SECRET`, `LLM_API_KEY`
+- Vite config: `base: './'`
+- Scripts: `dev`, `build`, `preview`
+- Provide a SQL/init script to create table + policies (RLS off or service role for API).
+- Provide optional Express server for local parity; default deployment: Vercel serverless.
+
+DELIVERABLES
+1) Working code with routes/components:
+   - `/src/components`: Uploader (admin only), FileCard, ReportCard, ReportView, ChartsBoard, PlanView, ScoreCard, AdminLogin, Toast
+   - `/src/lib`: aiClient.js, supabaseClient.js, extractors.js, schema.js, jsonSafeParse.ts, storage.js, auth.js
+2) `/api`: `login.js`, `me.js`, `upload.js`, `analyze.js`, `publish.js`, `delete.js`, `list.js`, `report.js`
+3) README with env setup, Supabase bucket/table setup, run & deploy steps
+4) Minimal tests for `jsonSafeParse` and extractors
+
+ACCEPTANCE CRITERIA
+- Anonymous users can browse published reports on any browser/device.
+- Upload/Analyze/Publish/Delete are **blocked** unless admin is logged in.
+- After upload+analyze+publish by admin, the report appears on the public dashboard.
+- Charts render from `ai_json.charts`. Plan shows 4 weeks with goals/metrics.
+- Final HTML/PDF generated and downloadable (public for published).
