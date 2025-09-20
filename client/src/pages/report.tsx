@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "wouter";
@@ -15,6 +14,8 @@ import KPIsTab from "@/components/KPIsTab";
 import PlanView from "@/components/PlanView";
 import AIAnalyzeTabs from "@/components/AIAnalyzeTabs";
 import { jsonSafeParse } from "@/lib/jsonSafeParse";
+import SmartActionButtons from "@/components/SmartActionButtons";
+import FloatingActionButton from "@/components/FloatingActionButton";
 
 export default function ReportPage() {
   const { id } = useParams<{ id: string }>();
@@ -41,9 +42,12 @@ export default function ReportPage() {
   });
 
   const report = currentReport || fetchedReport;
+  // State to hold the report data, used by SmartActionButtons
+  const [reportState, setReportState] = useState<any>(report);
 
   const handleReportUpdate = (updatedReport: any) => {
     setCurrentReport(updatedReport);
+    setReportState(updatedReport); // Update reportState as well
     queryClient.setQueryData(["report", id], updatedReport);
   };
 
@@ -74,7 +78,7 @@ export default function ReportPage() {
 
   const analysisData = report.ai_json ? jsonSafeParse(JSON.stringify(report.ai_json)) : null;
   const hasAnalysis = analysisData && report.ai_markdown;
-  
+
   // Check if user is admin to show analyze button
   const isAdmin = document.cookie.includes('ri_admin') || document.cookie.includes('admin_token');
 
@@ -110,7 +114,7 @@ export default function ReportPage() {
               Back to Dashboard
             </Button>
           </Link>
-          
+
           <div className="flex items-center space-x-4 mb-4">
             <h1 className="text-3xl font-bold">{report.title}</h1>
             {report.score && (
@@ -122,14 +126,14 @@ export default function ReportPage() {
               </div>
             )}
           </div>
-          
+
           <div className="flex items-center gap-2">
             <Badge variant="secondary">
               {report.status === "published" ? "Published" : "Draft"}
             </Badge>
           </div>
         </div>
-        
+
         <div className="flex items-center space-x-3">
           <Button variant="outline">
             <Download className="w-4 h-4 mr-2" />
@@ -144,7 +148,20 @@ export default function ReportPage() {
 
       {/* AI Analysis Component */}
       <AIAnalyzeTabs report={report} onUpdate={handleReportUpdate} />
-      
+
+      {/* Smart Action Buttons */}
+      <div className="mb-8">
+        <SmartActionButtons
+          report={reportState}
+          onAnalyze={() => {
+            // Trigger AI analysis from AIAnalyzeTabs
+            const analyzeButton = document.querySelector('[data-analyze-button]') as HTMLButtonElement;
+            analyzeButton?.click();
+          }}
+          onUpdate={setReportState}
+        />
+      </div>
+
       {/* Source Files Section */}
       {report.files && report.files.length > 0 && (
         <Card>
@@ -178,6 +195,29 @@ export default function ReportPage() {
           </CardContent>
         </Card>
       )}
+
+      <ReportView report={reportState} />
+
+      {/* Floating Action Button */}
+      <FloatingActionButton
+        onAction={(action) => {
+          switch(action) {
+            case "analyze":
+              const analyzeButton = document.querySelector('[data-analyze-button]') as HTMLButtonElement;
+              analyzeButton?.click();
+              break;
+            case "charts":
+              console.log("Generate charts");
+              break;
+            case "goals":
+              console.log("Set goals");
+              break;
+            case "export":
+              console.log("Export PDF");
+              break;
+          }
+        }}
+      />
     </div>
   );
 }

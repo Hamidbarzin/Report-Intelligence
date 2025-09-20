@@ -100,6 +100,7 @@ export default function AIAnalyzeTabs({ report, onUpdate }: AIAnalyzeTabsProps) 
           onClick={runAnalyze}
           disabled={loading}
           className="flex items-center gap-2"
+          data-analyze-button
         >
           {loading ? (
             <Loader2 className="h-4 w-4 animate-spin" />
