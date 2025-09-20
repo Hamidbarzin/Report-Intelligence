@@ -1,19 +1,23 @@
-import { useParams } from "wouter";
+
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { useParams } from "wouter";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, Calendar, FileText, BarChart3, Brain, Target, TrendingUp, FileSearch } from "lucide-react";
-import { jsonSafeParse } from "@/lib/jsonSafeParse";
+import { ArrowLeft, Star, Download, Share, Eye, FileText, Image, Globe, Calendar, Clock, Target, AlertTriangle, Users, Flag, CheckCircle, TrendingUp, TrendingDown, Minus, Brain, Loader2 } from "lucide-react";
+import { Link } from "wouter";
+import { useToast } from "@/hooks/use-toast";
+import ChartsBoard from "@/components/ChartsBoard";
 import SummaryTab from "@/components/SummaryTab";
 import KPIsTab from "@/components/KPIsTab";
-import ChartsBoard from "@/components/ChartsBoard";
 import PlanView from "@/components/PlanView";
-import { useToast } from "@/hooks/use-toast";
+import { jsonSafeParse } from "@/lib/jsonSafeParse";
 
 export default function ReportPage() {
-  const { id } = useParams();
+  const { id } = useParams<{ id: string }>();
+  const [activeTab, setActiveTab] = useState("summary");
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -26,6 +30,7 @@ export default function ReportPage() {
       }
       return response.json();
     },
+    enabled: !!id
   });
 
   const analyzeMutation = useMutation({
@@ -73,6 +78,12 @@ export default function ReportPage() {
         <p className="text-gray-600 dark:text-gray-400 mt-2">
           The report you're looking for doesn't exist or isn't published.
         </p>
+        <Link href="/">
+          <Button className="mt-4">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Dashboard
+          </Button>
+        </Link>
       </div>
     );
   }
@@ -80,139 +91,151 @@ export default function ReportPage() {
   const analysisData = report.ai_json ? jsonSafeParse(JSON.stringify(report.ai_json)) : null;
   const hasAnalysis = analysisData && report.ai_markdown;
 
+  const getFileIcon = (type: string) => {
+    switch (type) {
+      case "html": return <Globe className="w-5 h-5" />;
+      case "image": return <Image className="w-5 h-5" />;
+      default: return <FileText className="w-5 h-5" />;
+    }
+  };
+
+  const formatDate = (date: string) => {
+    return new Date(date).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "long",
+      day: "numeric"
+    });
+  };
+
+  const formatFileSize = (sizeKb: number) => {
+    if (sizeKb < 1024) return `${sizeKb} KB`;
+    return `${(sizeKb / 1024).toFixed(1)} MB`;
+  };
+
   return (
     <div className="max-w-6xl mx-auto space-y-6">
+      {/* Report Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold">{report.title}</h1>
-        <div className="flex items-center gap-2">
-          <Badge variant="secondary">
-            {report.status === "published" ? "Published" : "Draft"}
-          </Badge>
-          {!hasAnalysis && (
-            <Button
-              onClick={() => analyzeMutation.mutate()}
-              disabled={analyzeMutation.isPending}
-              className="flex items-center gap-2"
-            >
-              {analyzeMutation.isPending ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Brain className="h-4 w-4" />
-              )}
-              Analyze with AI
+        <div className="flex-1">
+          <Link href="/">
+            <Button variant="ghost" className="mb-4">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Dashboard
             </Button>
-          )}
+          </Link>
+          
+          <div className="flex items-center space-x-4 mb-4">
+            <h1 className="text-3xl font-bold">{report.title}</h1>
+            {report.score && (
+              <div className="flex items-center space-x-2">
+                <span className="text-2xl font-bold text-accent">
+                  {parseFloat(report.score).toFixed(1)}
+                </span>
+                <Star className="w-5 h-5 text-accent fill-current" />
+              </div>
+            )}
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <Badge variant="secondary">
+              {report.status === "published" ? "Published" : "Draft"}
+            </Badge>
+            {!hasAnalysis && (
+              <Button
+                onClick={() => analyzeMutation.mutate()}
+                disabled={analyzeMutation.isPending}
+                className="flex items-center gap-2"
+              >
+                {analyzeMutation.isPending ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Brain className="h-4 w-4" />
+                )}
+                Analyze with AI
+              </Button>
+            )}
+          </div>
+        </div>
+        
+        <div className="flex items-center space-x-3">
+          <Button variant="outline">
+            <Download className="w-4 h-4 mr-2" />
+            Export PDF
+          </Button>
+          <Button>
+            <Share className="w-4 h-4 mr-2" />
+            Share
+          </Button>
         </div>
       </div>
 
       {hasAnalysis ? (
-        <Tabs defaultValue="summary" className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="summary" className="flex items-center gap-2">
-              <FileSearch className="h-4 w-4" />
-              Summary
-            </TabsTrigger>
-            <TabsTrigger value="kpis" className="flex items-center gap-2">
-              <TrendingUp className="h-4 w-4" />
-              KPIs
-            </TabsTrigger>
-            <TabsTrigger value="charts" className="flex items-center gap-2">
-              <BarChart3 className="h-4 w-4" />
-              Charts
-            </TabsTrigger>
-            <TabsTrigger value="plan" className="flex items-center gap-2">
-              <Target className="h-4 w-4" />
-              Plan
-            </TabsTrigger>
-            <TabsTrigger value="details" className="flex items-center gap-2">
-              <FileText className="h-4 w-4" />
-              Details
-            </TabsTrigger>
+            <TabsTrigger value="summary">Summary</TabsTrigger>
+            <TabsTrigger value="kpis">KPIs</TabsTrigger>
+            <TabsTrigger value="charts">Charts</TabsTrigger>
+            <TabsTrigger value="plan">Action Plan</TabsTrigger>
+            <TabsTrigger value="files">Source Files</TabsTrigger>
           </TabsList>
 
-          <TabsContent value="summary">
+          <TabsContent value="summary" className="space-y-6">
             <SummaryTab markdown={report.ai_markdown} />
           </TabsContent>
 
-          <TabsContent value="kpis">
+          <TabsContent value="kpis" className="space-y-6">
             <KPIsTab data={analysisData} />
           </TabsContent>
 
-          <TabsContent value="charts">
+          <TabsContent value="charts" className="space-y-8">
             <ChartsBoard data={analysisData} />
           </TabsContent>
 
-          <TabsContent value="plan">
-            <PlanView data={analysisData} />
+          <TabsContent value="plan" className="space-y-8">
+            <PlanView data={analysisData?.next_month_plan} />
           </TabsContent>
 
-          <TabsContent value="details">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Calendar className="h-5 w-5" />
-                  Report Details
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Size</p>
-                    <p>{report.size_kb} KB</p>
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Status</p>
-                    <p className="capitalize">{report.status}</p>
-                  </div>
-                </div>
-
-                {report.score && (
-                  <div>
-                    <p className="text-sm font-medium text-gray-500">Score</p>
-                    <p className="text-2xl font-bold text-blue-600">{report.score}/100</p>
-                  </div>
-                )}
-
-                {report.files && report.files.length > 0 && (
-                  <div>
-                    <p className="text-sm font-medium text-gray-500 mb-2">Files</p>
-                    <div className="space-y-2">
-                      {report.files.map((file: any, index: number) => (
-                        <div key={index} className="flex items-center gap-2 p-2 border rounded">
-                          <FileText className="h-4 w-4" />
-                          <span className="text-sm">{file.file_name}</span>
-                          <Badge variant="outline" className="text-xs">
-                            {file.type}
-                          </Badge>
+          <TabsContent value="files" className="space-y-6">
+            {report.files && report.files.length > 0 ? (
+              <div className="space-y-4">
+                {report.files.map((file: any, index: number) => (
+                  <Card key={index}>
+                    <CardContent className="p-6">
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center space-x-4">
+                          <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
+                            {getFileIcon(file.type)}
+                          </div>
+                          <div>
+                            <h3 className="font-medium">{file.file_name}</h3>
+                            <p className="text-sm text-muted-foreground">
+                              {file.type.toUpperCase()} • {formatFileSize(file.size_kb)}
+                            </p>
+                          </div>
                         </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                        <div className="flex items-center space-x-2">
+                          <Button variant="ghost" size="sm">
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                          <Button variant="ghost" size="sm">
+                            <Download className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <p className="text-muted-foreground">No source files available for this report.</p>
+              </div>
+            )}
           </TabsContent>
         </Tabs>
       ) : (
         <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Calendar className="h-5 w-5" />
-              Report Details
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-sm font-medium text-gray-500">Size</p>
-                <p>{report.size_kb} KB</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium text-gray-500">Status</p>
-                <p className="capitalize">{report.status}</p>
-              </div>
-            </div>
-
+          <CardContent className="p-8">
             {report.files && report.files.length > 0 && (
               <div>
                 <p className="text-sm font-medium text-gray-500 mb-2">Files</p>
