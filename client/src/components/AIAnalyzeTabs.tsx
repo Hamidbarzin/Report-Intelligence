@@ -128,7 +128,7 @@ export default function AIAnalyzeTabs({ report, onUpdate }: AIAnalyzeTabsProps) 
       )}
       {!ai && !isAdmin && (
         <div className="text-muted-foreground text-center p-4">
-          <p>تحلیل هوشمند فقط برای ادمین‌ها در دسترس است.</p>
+          <p>تحلیل هوشمند فقط برای مدیران سیستم در دسترس است.</p>
         </div>
       )}
 
@@ -235,7 +235,7 @@ function KPIsView({ ai }: { ai: any }) {
                   )}
                   <span className="text-sm">
                     <Badge variant="outline" className="text-xs mr-2">
-                      {x.type}
+                      {x.type === 'win' ? 'موفقیت' : x.type === 'risk' ? 'ریسک' : x.type}
                     </Badge>
                     {x.text}
                   </span>

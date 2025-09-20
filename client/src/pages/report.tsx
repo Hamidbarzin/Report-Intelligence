@@ -79,9 +79,9 @@ export default function ReportPage() {
   if (error || !report) {
     return (
       <div className="text-center py-8">
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Report Not Found</h2>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100">گزارش یافت نشد</h2>
         <p className="text-gray-600 dark:text-gray-400 mt-2">
-          The report you're looking for doesn't exist or isn't published.
+          گزارشی که به دنبال آن هستید وجود ندارد یا منتشر نشده است.
         </p>
         <Link href="/">
           <Button className="mt-4">
@@ -151,11 +151,11 @@ export default function ReportPage() {
         <div className="flex items-center space-x-3">
           <Button variant="outline">
             <Download className="w-4 h-4 mr-2" />
-            Export PDF
+            صادرات PDF
           </Button>
           <Button>
             <Share className="w-4 h-4 mr-2" />
-            Share
+            اشتراک‌گذاری
           </Button>
         </div>
       </div>
@@ -206,7 +206,7 @@ export default function ReportPage() {
       {report.files && report.files.length > 0 && (
         <Card>
           <CardContent className="p-6">
-            <h3 className="text-lg font-semibold mb-4">Source Files</h3>
+            <h3 className="text-lg font-semibold mb-4">فایل‌های منبع</h3>
             <div className="space-y-4">
               {report.files.map((file: any, index: number) => (
                 <div key={index} className="flex items-center justify-between p-4 border rounded-lg">

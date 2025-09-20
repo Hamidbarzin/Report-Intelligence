@@ -97,8 +97,8 @@ export function Dashboard() {
       {/* Dashboard Header */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">داشبورد گزارش‌ها</h1>
-          <p className="text-muted-foreground mt-2">AI-analyzed intelligence reports from our research team</p>
+          <h1 className="text-3xl font-bold tracking-tight">داشبورد گزارش‌های هوشمند</h1>
+          <p className="text-muted-foreground mt-2">گزارش‌های تحلیل شده با هوش مصنوعی از تیم تحقیقات ما</p>
         </div>
 
         {/* Filters & Search */}
@@ -106,7 +106,7 @@ export function Dashboard() {
           <div className="relative">
             <Search className="absolute left-3 top-2.5 w-4 h-4 text-muted-foreground" />
             <Input
-              placeholder="Search reports..."
+              placeholder="جستجو در گزارش‌ها..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-10 w-64"
@@ -142,7 +142,7 @@ export function Dashboard() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Total Reports</p>
+                <p className="text-sm font-medium text-muted-foreground">کل گزارش‌ها</p>
                 <p className="text-2xl font-bold text-foreground" data-testid="stat-total-reports">
                   {stats.totalReports}
                 </p>
@@ -158,7 +158,7 @@ export function Dashboard() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">Avg Score</p>
+                <p className="text-sm font-medium text-muted-foreground">میانگین امتیاز</p>
                 <p className="text-2xl font-bold text-foreground" data-testid="stat-avg-score">
                   {stats.avgScore}
                 </p>
@@ -174,7 +174,7 @@ export function Dashboard() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">This Month</p>
+                <p className="text-sm font-medium text-muted-foreground">این ماه</p>
                 <p className="text-2xl font-bold text-foreground" data-testid="stat-this-month">
                   {stats.thisMonth}
                 </p>
@@ -190,9 +190,9 @@ export function Dashboard() {
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">AI Analysis</p>
+                <p className="text-sm font-medium text-muted-foreground">تحلیل هوش مصنوعی</p>
                 <p className="text-2xl font-bold text-accent" data-testid="stat-ai-status">
-                  {stats.aiStatus}
+                  فعال
                 </p>
               </div>
               <div className="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center">
@@ -214,8 +214,8 @@ export function Dashboard() {
         <div className="text-center py-12">
           <p className="text-muted-foreground">
             {searchQuery || filterBy !== "all"
-              ? "No reports match your search criteria."
-              : "No published reports available."}
+              ? "هیچ گزارشی با معیارهای جستجوی شما یافت نشد."
+              : "هیچ گزارش منتشر شده‌ای در دسترس نیست."}
           </p>
         </div>
       )}

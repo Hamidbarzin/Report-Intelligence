@@ -29,7 +29,7 @@ export function ReportCard({ report }: ReportCardProps) {
   };
 
   const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString("en-US", {
+    return new Date(date).toLocaleDateString("fa-IR", {
       month: "short",
       day: "numeric",
       year: "numeric"
@@ -103,11 +103,11 @@ export function ReportCard({ report }: ReportCardProps) {
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2 text-xs">
                 <Badge className={getStatusColor(report.status)} variant="outline">
-                  {report.status === "published" ? "Published" : 
-                   report.status === "analyzed" ? "Analyzed" : "Uploaded"}
+                  {report.status === "published" ? "منتشر شده" : 
+                   report.status === "analyzed" ? "تحلیل شده" : "بارگذاری شده"}
                 </Badge>
                 <Badge variant="outline" className="text-muted-foreground">
-                  {fileCount} {fileCount === 1 ? "file" : "files"}
+                  {fileCount} فایل
                 </Badge>
               </div>
               <ArrowRight className="w-4 h-4 text-muted-foreground" />

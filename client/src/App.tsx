@@ -34,16 +34,16 @@ function Header() {
             </Link>
             <nav className="hidden md:flex space-x-6">
               <Link href="/">
-                <Button 
-                  variant="ghost" 
+                <Button
+                  variant="ghost"
                   className={location === "/" ? "text-primary" : "text-muted-foreground hover:text-primary"}
                 >
-                  Dashboard
+                  داشبورد
                 </Button>
               </Link>
               <Link href="/analysis">
-                <Button 
-                  variant="ghost" 
+                <Button
+                  variant="ghost"
                   className={location === "/analysis" ? "text-primary" : "text-muted-foreground hover:text-primary"}
                 >
                   آرشیو تحلیل‌ها
@@ -51,12 +51,12 @@ function Header() {
               </Link>
             </nav>
           </div>
-          
+
           <div className="flex items-center space-x-4">
             <div className="relative hidden md:block">
-              <Input 
-                type="text" 
-                placeholder="Search reports..." 
+              <Input
+                type="text"
+                placeholder="Search reports..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-64 pl-10"
@@ -69,7 +69,7 @@ function Header() {
                 Admin
               </Button>
             </Link>
-            
+
             <Button
               variant="ghost"
               size="sm"
@@ -81,14 +81,14 @@ function Header() {
             </Button>
           </div>
         </div>
-        
+
         {/* Mobile Menu */}
         {isMenuOpen && (
           <div className="md:hidden py-4 border-t border-border">
             <div className="space-y-4">
-              <Input 
-                type="text" 
-                placeholder="Search reports..." 
+              <Input
+                type="text"
+                placeholder="Search reports..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full"
@@ -97,7 +97,7 @@ function Header() {
               <nav className="space-y-2">
                 <Link href="/">
                   <Button variant="ghost" className="w-full justify-start">
-                    Dashboard
+                    داشبورد
                   </Button>
                 </Link>
               </nav>

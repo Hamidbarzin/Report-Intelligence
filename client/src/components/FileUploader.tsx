@@ -47,8 +47,8 @@ export function FileUploader({ onUploadComplete }: FileUploaderProps) {
 
     if (!title.trim()) {
       toast({
-        title: "Error",
-        description: "Please enter a title for the report",
+        title: "خطا",
+        description: "لطفاً عنوانی برای گزارش وارد کنید",
         variant: "destructive"
       });
       return;
@@ -56,8 +56,8 @@ export function FileUploader({ onUploadComplete }: FileUploaderProps) {
 
     if (selectedFiles.length === 0) {
       toast({
-        title: "Error", 
-        description: "Please select at least one file to upload",
+        title: "خطا", 
+        description: "لطفاً حداقل یک فایل برای آپلود انتخاب کنید",
         variant: "destructive"
       });
       return;
@@ -81,8 +81,8 @@ export function FileUploader({ onUploadComplete }: FileUploaderProps) {
       setUploadProgress(100);
 
       toast({
-        title: "Success",
-        description: "Files uploaded successfully",
+        title: "موفقیت",
+        description: "فایل‌ها با موفقیت آپلود شدند",
       });
 
       // Reset form
@@ -93,8 +93,8 @@ export function FileUploader({ onUploadComplete }: FileUploaderProps) {
       onUploadComplete?.(result.reportId);
     } catch (error) {
       toast({
-        title: "Upload Failed",
-        description: error instanceof Error ? error.message : "Upload failed",
+        title: "آپلود ناموفق",
+        description: error instanceof Error ? error.message : "آپلود با شکست مواجه شد",
         variant: "destructive"
       });
     } finally {
@@ -130,7 +130,7 @@ export function FileUploader({ onUploadComplete }: FileUploaderProps) {
             <div>
               <h3 className="text-lg font-medium">فایل‌ها را اینجا بکشید یا کلیک کنید</h3>
               <p className="text-muted-foreground">فقط فایل‌های HTML پذیرفته می‌شوند</p>
-              <p className="text-sm text-muted-foreground">Maximum file size: 20MB per file</p>
+              <p className="text-sm text-muted-foreground">حداکثر اندازه فایل: ۲۰ مگابایت برای هر فایل</p>
             </div>
             <Button asChild>
               <label>
@@ -239,7 +239,7 @@ export function FileUploader({ onUploadComplete }: FileUploaderProps) {
                 disabled={isUploading}
                 data-testid="button-upload"
               >
-                {isUploading ? "در حال آپلود..." : "آپلود و پردازش"}
+                {isUploading ? "در حال آپلود..." : "آپلود و تحلیل"}
               </Button>
             </div>
           </div>
