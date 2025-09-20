@@ -1,23 +1,23 @@
 import { sql } from "drizzle-orm";
-import { pgTable, text, varchar, bigint, timestamp, numeric, jsonb, boolean } from "drizzle-orm/pg-core";
+import { sqliteTable, text, integer, real } from "drizzle-orm/sqlite-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
-export const reports = pgTable("reports", {
-  id: bigint("id", { mode: "number" }).primaryKey().generatedByDefaultAsIdentity(),
+export const reports = sqliteTable("reports", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
   title: text("title").notNull(),
-  upload_date: timestamp("upload_date").defaultNow().notNull(),
-  size_kb: numeric("size_kb").notNull(),
+  upload_date: text("upload_date").default(sql`CURRENT_TIMESTAMP`).notNull(),
+  size_kb: text("size_kb").notNull(),
   extracted_date: text("extracted_date"),
   extracted_text: text("extracted_text"),
   status: text("status", { enum: ["uploaded", "analyzed", "published"] }).default("uploaded").notNull(),
   content_url: text("content_url"),
-  files: jsonb("files").$type<FileItem[]>().default([]).notNull(),
-  ai_json: jsonb("ai_json").$type<AIAnalysis | null>(),
+  files: text("files", { mode: "json" }).$type<FileItem[]>().default([]).notNull(),
+  ai_json: text("ai_json", { mode: "json" }).$type<AIAnalysis | null>(),
   ai_markdown: text("ai_markdown"),
-  score: numeric("score"),
-  updated_at: timestamp("updated_at").defaultNow().notNull(),
-  is_published: boolean("is_published").default(false).notNull()
+  score: text("score"),
+  updated_at: text("updated_at").default(sql`CURRENT_TIMESTAMP`).notNull(),
+  is_published: integer("is_published", { mode: "boolean" }).default(false).notNull()
 });
 
 export type FileItem = {

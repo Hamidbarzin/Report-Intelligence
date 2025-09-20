@@ -1,17 +1,19 @@
-import { drizzle } from "drizzle-orm/neon-http";
-import { neon } from "@neondatabase/serverless";
+import { drizzle } from "drizzle-orm/better-sqlite3";
+import Database from "better-sqlite3";
 import { reports } from "@shared/schema";
+import path from "path";
 
 let db: any = null;
 
-if (process.env.DATABASE_URL) {
-  try {
-    const sql = neon(process.env.DATABASE_URL);
-    db = drizzle(sql, { schema: { reports } });
-  } catch (error) {
-    console.warn("Database connection failed, using null db:", error);
-    db = null;
-  }
+try {
+  // Use SQLite database for persistence
+  const dbPath = path.resolve(process.cwd(), 'data', 'reports.db');
+  const sqlite = new Database(dbPath);
+  db = drizzle(sqlite, { schema: { reports } });
+  console.log("SQLite database connected successfully");
+} catch (error) {
+  console.warn("Database connection failed, using null db:", error);
+  db = null;
 }
 
 export { db };

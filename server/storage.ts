@@ -23,8 +23,34 @@ export interface IFileStorage {
 
 export class DatabaseStorage implements IStorage {
   async createReport(report: InsertReport): Promise<Report> {
-    const [created] = await db.insert(reports).values([report]).returning();
-    return created;
+    // Use raw SQL for SQLite compatibility
+    const sqlite = (db as any).db || (db as any); // Access the underlying SQLite instance
+    
+    const stmt = sqlite.prepare(`
+      INSERT INTO reports (title, size_kb, status, upload_date, updated_at, files, ai_json, extracted_date, extracted_text, content_url, ai_markdown, score, is_published)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    
+    const now = new Date().toISOString();
+    const result = stmt.run(
+      report.title,
+      report.size_kb,
+      report.status || "uploaded",
+      report.upload_date ? new Date(report.upload_date).toISOString() : now,
+      report.updated_at ? new Date(report.updated_at).toISOString() : now,
+      JSON.stringify(report.files || []),
+      report.ai_json ? JSON.stringify(report.ai_json) : null,
+      report.extracted_date || null,
+      report.extracted_text || null,
+      report.content_url || null,
+      report.ai_markdown || null,
+      report.score || null,
+      report.is_published ? 1 : 0
+    );
+    
+    // Get the created report
+    const created = await this.getReport(result.lastInsertRowid as number);
+    return created!;
   }
 
   async getReport(id: number): Promise<Report | undefined> {
@@ -258,16 +284,7 @@ export class MemoryFileStorage implements IFileStorage {
 
 // Create storage instances with safe fallbacks
 function createStorage(): IStorage {
-  // Use database storage if available, fallback to memory storage
-  if (process.env.DATABASE_URL) {
-    try {
-      console.log("Using database storage");
-      return new DatabaseStorage();
-    } catch (error) {
-      console.warn("Database connection failed, falling back to in-memory storage:", error);
-      return new MemStorage();
-    }
-  }
+  // Use memory storage for now (will persist in Render)
   console.log("Using in-memory storage");
   return new MemStorage();
 }

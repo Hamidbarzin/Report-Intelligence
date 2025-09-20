@@ -186,10 +186,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       );
 
       // Create report record
+      const now = new Date();
       const report = await storage.createReport({
         title,
         size_kb: totalSizeKb.toString(),
-        status: "uploaded"
+        status: "uploaded",
+        upload_date: now.toISOString(),
+        updated_at: now.toISOString()
       });
 
       // Upload files to Supabase Storage and extract text
