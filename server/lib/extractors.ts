@@ -1,5 +1,5 @@
 import { JSDOM } from "jsdom";
-import cheerio from 'cheerio';
+import * as cheerio from 'cheerio';
 // analyzeImage function will be implemented separately
 
 // Lazy import pdf-parse to avoid startup issues
@@ -136,11 +136,11 @@ function extractParagraphsData($: any): string[] {
 function extractNumbersData($: any): string[] {
   const text = $.text();
   const numbers = text.match(/\d+(?:\.\d+)?(?:%|درصد|تومان|ریال|دلار|\$|€|£)?/g) || [];
-  return [...new Set(numbers)]; // Remove duplicates
+  return Array.from(new Set(numbers)); // Remove duplicates
 }
 
 function extractDatesData($: any): string[] {
   const text = $.text();
   const dates = text.match(/\d{4}[-\/]\d{1,2}[-\/]\d{1,2}|\d{1,2}[-\/]\d{1,2}[-\/]\d{4}|\d{1,2}\s+(ژانویه|فوریه|مارس|آوریل|مه|ژوئن|ژوئیه|اوت|سپتامبر|اکتبر|نوامبر|دسامبر|\u06A9\u0647|\u0622\u0628\u0627\u0646|\u0622\u0630\u0631|\u062F\u06CC|\u0628\u0647\u0645\u0646|\u0627\u0633\u0641\u0646\u062F|\u0641\u0631\u0648\u0631\u062F\u06CC\u0646|\u0627\u0631\u062F\u06CC\u0628\u0647\u0634\u062A|\u062E\u0631\u062F\u0627\u062F|\u062A\u06CC\u0631|\u0645\u0631\u062F\u0627\u062F|\u0634\u0647\u0631\u06CC\u0648\u0631|\u0645\u0647\u0631)\s+\d{4}/g) || [];
-  return [...new Set(dates)]; // Remove duplicates
+  return Array.from(new Set(dates)); // Remove duplicates
 }
