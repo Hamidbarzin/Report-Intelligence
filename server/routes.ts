@@ -193,19 +193,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const fileItem = await fileStorage.uploadFile(file, report.id);
           uploadedFiles.push(fileItem);
 
-          // Extract text from file
+          // Extract text from file and log for debugging
+          console.log(`Extracting text from ${file.originalname} (${file.mimetype}, ${file.size} bytes)`);
           const extractedText = await extractText(file);
+          console.log(`Extracted text length: ${extractedText.length} characters`);
+          console.log(`First 200 chars: ${extractedText.substring(0, 200)}...`);
           extractedTexts.push(`File: ${file.originalname}\n${extractedText}`);
         } catch (error) {
           console.error(`Failed to process ${file.originalname}:`, error);
           // Continue processing other files
+          extractedTexts.push(`File: ${file.originalname}\nError: Could not extract text from this file.`);
         }
       }
 
-      // Update report with file URLs and extracted date
+      // Save extracted text in report for faster analysis
+      const fullCorpus = `Report Title: ${title}\n\n${extractedTexts.join('\n\n')}`;
+
+      // Update report with file URLs, extracted date, and extracted text
       await storage.updateReport(report.id, {
         files: uploadedFiles,
-        extracted_date: new Date().toISOString()
+        extracted_date: new Date().toISOString(),
+        extracted_text: fullCorpus
       });
 
       res.json({

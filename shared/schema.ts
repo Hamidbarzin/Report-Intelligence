@@ -9,6 +9,7 @@ export const reports = pgTable("reports", {
   upload_date: timestamp("upload_date").defaultNow().notNull(),
   size_kb: numeric("size_kb").notNull(),
   extracted_date: text("extracted_date"),
+  extracted_text: text("extracted_text"),
   status: text("status", { enum: ["uploaded", "analyzed", "published"] }).default("uploaded").notNull(),
   content_url: text("content_url"),
   files: jsonb("files").$type<FileItem[]>().default([]).notNull(),
