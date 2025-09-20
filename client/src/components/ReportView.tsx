@@ -5,9 +5,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Star, Download, Share, Eye, FileText, Image, Globe, Calendar, Clock, Target, AlertTriangle, Users, Flag, CheckCircle } from "lucide-react";
+import { ArrowLeft, Star, Download, Share, Eye, FileText, Image, Globe, Calendar, Clock, Target, AlertTriangle, Users, Flag, CheckCircle, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { Link } from "wouter";
-import { ChartsBoard } from "./ChartsBoard";
+import ChartsBoard from "./ChartsBoard";
 import { getReport } from "@/lib/api";
 import type { Report, KPI, WeeklyGoal, Milestone, RiskMitigation } from "@shared/schema";
 
