@@ -2,9 +2,16 @@ import { drizzle } from "drizzle-orm/neon-http";
 import { neon } from "@neondatabase/serverless";
 import { reports } from "@shared/schema";
 
-if (!process.env.DATABASE_URL) {
-  throw new Error("DATABASE_URL environment variable is required");
+let db: any = null;
+
+if (process.env.DATABASE_URL) {
+  try {
+    const sql = neon(process.env.DATABASE_URL);
+    db = drizzle(sql, { schema: { reports } });
+  } catch (error) {
+    console.warn("Database connection failed, using null db:", error);
+    db = null;
+  }
 }
 
-const sql = neon(process.env.DATABASE_URL);
-export const db = drizzle(sql, { schema: { reports } });
+export { db };

@@ -3,41 +3,41 @@
 @tailwind utilities;
 
 :root {
-  --background: hsl(210, 40%, 98%);
-  --foreground: hsl(210, 22%, 15%);
-  --card: hsl(0, 0%, 100%);
-  --card-foreground: hsl(210, 22%, 15%);
-  --popover: hsl(0, 0%, 100%);
-  --popover-foreground: hsl(210, 22%, 15%);
-  --primary: hsl(214, 88%, 42%);
-  --primary-foreground: hsl(0, 0%, 100%);
-  --secondary: hsl(214, 15%, 59%);
-  --secondary-foreground: hsl(210, 20%, 30%);
-  --muted: hsl(214, 20%, 95%);
-  --muted-foreground: hsl(214, 15%, 45%);
-  --accent: hsl(158, 68%, 38%);
-  --accent-foreground: hsl(0, 0%, 100%);
-  --destructive: hsl(0, 72%, 50%);
-  --destructive-foreground: hsl(0, 0%, 100%);
-  --border: hsl(214, 20%, 90%);
-  --input: hsl(214, 20%, 95%);
-  --ring: hsl(214, 88%, 42%);
-  --chart-1: hsl(214, 88%, 42%);
-  --chart-2: hsl(158, 68%, 38%);
-  --chart-3: hsl(280, 65%, 60%);
-  --chart-4: hsl(45, 85%, 55%);
+  --background: hsl(222, 84%, 5%);
+  --foreground: hsl(210, 40%, 85%);
+  --card: hsl(224, 71%, 4%);
+  --card-foreground: hsl(210, 40%, 85%);
+  --popover: hsl(224, 71%, 4%);
+  --popover-foreground: hsl(210, 40%, 85%);
+  --primary: hsl(210, 40%, 85%);
+  --primary-foreground: hsl(222, 84%, 5%);
+  --secondary: hsl(217, 32%, 17%);
+  --secondary-foreground: hsl(210, 40%, 85%);
+  --muted: hsl(217, 32%, 17%);
+  --muted-foreground: hsl(215, 20%, 70%);
+  --accent: hsl(217, 32%, 17%);
+  --accent-foreground: hsl(210, 40%, 85%);
+  --destructive: hsl(0, 62%, 30%);
+  --destructive-foreground: hsl(210, 40%, 85%);
+  --border: hsl(217, 32%, 17%);
+  --input: hsl(217, 32%, 17%);
+  --ring: hsl(212, 100%, 50%);
+  --chart-1: hsl(220, 70%, 50%);
+  --chart-2: hsl(160, 60%, 45%);
+  --chart-3: hsl(30, 80%, 55%);
+  --chart-4: hsl(280, 65%, 60%);
   --chart-5: hsl(340, 75%, 55%);
-  --sidebar: hsl(180, 6.6667%, 97.0588%);
-  --sidebar-foreground: hsl(210, 25%, 7.8431%);
-  --sidebar-primary: hsl(203.8863, 88.2845%, 53.1373%);
-  --sidebar-primary-foreground: hsl(0, 0%, 100%);
-  --sidebar-accent: hsl(211.5789, 51.3514%, 92.7451%);
-  --sidebar-accent-foreground: hsl(203.8863, 88.2845%, 53.1373%);
-  --sidebar-border: hsl(205.0000, 25.0000%, 90.5882%);
-  --sidebar-ring: hsl(202.8169, 89.1213%, 53.1373%);
+  --sidebar: hsl(224, 71%, 4%);
+  --sidebar-foreground: hsl(210, 40%, 85%);
+  --sidebar-primary: hsl(210, 40%, 85%);
+  --sidebar-primary-foreground: hsl(222, 84%, 5%);
+  --sidebar-accent: hsl(217, 32%, 17%);
+  --sidebar-accent-foreground: hsl(210, 40%, 85%);
+  --sidebar-border: hsl(217, 32%, 17%);
+  --sidebar-ring: hsl(212, 100%, 50%);
   --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
   --font-mono: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
-  --radius: 8px;
+  --radius: 12px;
 }
 
 .dark {
@@ -84,19 +84,22 @@
     @apply font-sans antialiased bg-background text-foreground;
     font-family: Tahoma, Arial, sans-serif;
     direction: rtl;
+    background: linear-gradient(135deg, hsl(222, 84%, 5%) 0%, hsl(224, 71%, 4%) 100%);
+    min-height: 100vh;
   }
 
-  /* استایل‌های بهبود یافته فارسی */
+  /* استایل‌های بهبود یافته فارسی - تم تاریک و مدرن */
   .upload-zone {
-    border: 3px dashed #cbd5e1;
+    border: 3px dashed hsl(217, 32%, 17%);
     text-align: center;
     cursor: pointer;
     transition: all 0.3s;
-    padding: 40px 20px;
-    border-radius: 16px;
-    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    padding: 50px 30px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, hsl(224, 71%, 4%) 0%, hsl(217, 32%, 17%) 100%);
     position: relative;
     overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
   }
 
   .upload-zone::before {
@@ -116,58 +119,60 @@
   }
 
   .upload-zone:hover {
-    border-color: #3b82f6;
-    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-    transform: translateY(-4px);
-    box-shadow: 0 12px 32px rgba(59, 130, 246, 0.2);
+    border-color: hsl(212, 100%, 50%);
+    background: linear-gradient(135deg, hsl(224, 71%, 4%) 0%, hsl(217, 32%, 17%) 100%);
+    transform: translateY(-6px);
+    box-shadow: 0 20px 40px rgba(59, 130, 246, 0.2);
   }
 
   .stat-card {
-    padding: 24px;
-    border-radius: 16px;
+    padding: 28px;
+    border-radius: 20px;
     text-align: center;
     color: white;
-    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    background: linear-gradient(135deg, hsl(220, 70%, 50%) 0%, hsl(212, 100%, 50%) 100%);
     box-shadow: 0 8px 32px rgba(59, 130, 246, 0.3);
     transition: all 0.3s;
+    border: 1px solid rgba(255, 255, 255, 0.1);
   }
 
   .stat-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 40px rgba(59, 130, 246, 0.4);
+    transform: translateY(-4px);
+    box-shadow: 0 16px 48px rgba(59, 130, 246, 0.4);
   }
 
   .action-urgent {
-    background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
-    border: 2px solid #fecaca;
-    border-radius: 16px;
-    padding: 24px;
-    margin-bottom: 20px;
-    box-shadow: 0 4px 16px rgba(239, 68, 68, 0.1);
+    background: linear-gradient(135deg, hsl(0, 62%, 30%) 0%, hsl(0, 50%, 25%) 100%);
+    border: 2px solid hsl(0, 62%, 30%);
+    border-radius: 20px;
+    padding: 28px;
+    margin-bottom: 24px;
+    box-shadow: 0 6px 24px rgba(220, 38, 38, 0.3);
   }
 
   .action-success {
-    background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
-    border: 2px solid #bbf7d0;
-    border-radius: 16px;
-    padding: 24px;
-    box-shadow: 0 4px 16px rgba(34, 197, 94, 0.1);
+    background: linear-gradient(135deg, hsl(160, 60%, 45%) 0%, hsl(160, 50%, 35%) 100%);
+    border: 2px solid hsl(160, 60%, 45%);
+    border-radius: 20px;
+    padding: 28px;
+    box-shadow: 0 6px 24px rgba(34, 197, 94, 0.3);
   }
 
   .btn {
-    background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+    background: linear-gradient(135deg, hsl(220, 70%, 50%), hsl(212, 100%, 50%));
     color: white;
     border: none;
-    padding: 16px 32px;
-    border-radius: 16px;
+    padding: 18px 36px;
+    border-radius: 20px;
     font-size: 16px;
-    font-weight: 700;
+    font-weight: 600;
     cursor: pointer;
     transition: all 0.3s;
     margin: 8px;
     position: relative;
     overflow: hidden;
-    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.2);
+    box-shadow: 0 6px 24px rgba(59, 130, 246, 0.4);
+    border: 1px solid rgba(255, 255, 255, 0.1);
   }
 
   .btn::before {
@@ -186,13 +191,13 @@
   }
 
   .btn:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 12px 32px rgba(59, 130, 246, 0.4);
-    background: linear-gradient(135deg, #2563eb, #1e40af);
+    transform: translateY(-4px);
+    box-shadow: 0 16px 40px rgba(59, 130, 246, 0.5);
+    background: linear-gradient(135deg, hsl(212, 100%, 50%), hsl(220, 70%, 50%));
   }
 
   .btn:active {
-    transform: translateY(-1px);
+    transform: translateY(-2px);
   }
 
   /* انیمیشن‌های اضافی */

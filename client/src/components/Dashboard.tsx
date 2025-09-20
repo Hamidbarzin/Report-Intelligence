@@ -95,26 +95,26 @@ export function Dashboard() {
   return (
     <div className="space-y-8" data-testid="dashboard">
       {/* Dashboard Header */}
-      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0 bg-gradient-to-r from-card to-secondary p-8 rounded-3xl border border-border">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">داشبورد گزارش‌های هوشمند</h1>
-          <p className="text-muted-foreground mt-2">گزارش‌های تحلیل شده با هوش مصنوعی از تیم تحقیقات ما</p>
+          <h1 className="text-4xl font-bold tracking-tight text-foreground">داشبورد گزارش‌های هوشمند</h1>
+          <p className="text-muted-foreground mt-3 text-lg">گزارش‌های تحلیل شده با هوش مصنوعی از تیم تحقیقات ما</p>
         </div>
 
         {/* Filters & Search */}
         <div className="flex flex-wrap items-center gap-4">
           <div className="relative">
-            <Search className="absolute left-3 top-2.5 w-4 h-4 text-muted-foreground" />
+            <Search className="absolute left-3 top-2.5 w-5 h-5 text-blue-300" />
             <Input
               placeholder="جستجو در گزارش‌ها..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 w-64"
+              className="pl-12 w-72 h-12 rounded-xl border-border focus:border-blue-400 focus:ring-blue-400/20 bg-card/80 backdrop-blur-sm text-foreground placeholder:text-muted-foreground"
               data-testid="input-search"
             />
           </div>
           <Select value={filterBy} onValueChange={setFilterBy}>
-            <SelectTrigger className="w-48" data-testid="select-filter">
+            <SelectTrigger className="w-52 h-12 rounded-xl border-border focus:border-blue-400 focus:ring-blue-400/20 bg-card/80 backdrop-blur-sm" data-testid="select-filter">
               <SelectValue placeholder="فیلتر بر اساس..." />
             </SelectTrigger>
             <SelectContent>
@@ -124,7 +124,7 @@ export function Dashboard() {
             </SelectContent>
           </Select>
           <Select value={sortBy} onValueChange={setSortBy}>
-            <SelectTrigger className="w-40" data-testid="select-sort">
+            <SelectTrigger className="w-44 h-12 rounded-xl border-border focus:border-blue-400 focus:ring-blue-400/20 bg-card/80 backdrop-blur-sm" data-testid="select-sort">
               <SelectValue placeholder="مرتب‌سازی بر اساس..." />
             </SelectTrigger>
             <SelectContent>
@@ -138,65 +138,65 @@ export function Dashboard() {
 
       {/* Stats Overview */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <Card>
+        <Card className="bg-gradient-to-br from-blue-900/20 to-cyan-900/20 border-blue-800/30 shadow-lg hover:shadow-xl transition-all duration-300">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">کل گزارش‌ها</p>
-                <p className="text-2xl font-bold text-foreground" data-testid="stat-total-reports">
+                <p className="text-sm font-semibold text-blue-200 uppercase tracking-wide">کل گزارش‌ها</p>
+                <p className="text-3xl font-bold text-blue-100 mt-2" data-testid="stat-total-reports">
                   {stats.totalReports}
                 </p>
               </div>
-              <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
-                <FileText className="w-5 h-5 text-primary" />
+              <div className="w-12 h-12 bg-gradient-to-br from-blue-900/30 to-cyan-900/30 rounded-xl flex items-center justify-center">
+                <FileText className="w-6 h-6 text-blue-300" />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-gradient-to-br from-emerald-900/20 to-green-900/20 border-emerald-800/30 shadow-lg hover:shadow-xl transition-all duration-300">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">میانگین امتیاز</p>
-                <p className="text-2xl font-bold text-foreground" data-testid="stat-avg-score">
+                <p className="text-sm font-semibold text-emerald-200 uppercase tracking-wide">میانگین امتیاز</p>
+                <p className="text-3xl font-bold text-emerald-100 mt-2" data-testid="stat-avg-score">
                   {stats.avgScore}
                 </p>
               </div>
-              <div className="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center">
-                <TrendingUp className="w-5 h-5 text-accent" />
+              <div className="w-12 h-12 bg-gradient-to-br from-emerald-900/30 to-green-900/30 rounded-xl flex items-center justify-center">
+                <TrendingUp className="w-6 h-6 text-emerald-300" />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-gradient-to-br from-purple-900/20 to-pink-900/20 border-purple-800/30 shadow-lg hover:shadow-xl transition-all duration-300">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">این ماه</p>
-                <p className="text-2xl font-bold text-foreground" data-testid="stat-this-month">
+                <p className="text-sm font-semibold text-purple-200 uppercase tracking-wide">این ماه</p>
+                <p className="text-3xl font-bold text-purple-100 mt-2" data-testid="stat-this-month">
                   {stats.thisMonth}
                 </p>
               </div>
-              <div className="w-10 h-10 bg-chart-3/10 rounded-lg flex items-center justify-center">
-                <Calendar className="w-5 h-5 text-chart-3" />
+              <div className="w-12 h-12 bg-gradient-to-br from-purple-900/30 to-pink-900/30 rounded-xl flex items-center justify-center">
+                <Calendar className="w-6 h-6 text-purple-300" />
               </div>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-gradient-to-br from-orange-900/20 to-yellow-900/20 border-orange-800/30 shadow-lg hover:shadow-xl transition-all duration-300">
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-muted-foreground">تحلیل هوش مصنوعی</p>
-                <p className="text-2xl font-bold text-accent" data-testid="stat-ai-status">
+                <p className="text-sm font-semibold text-orange-200 uppercase tracking-wide">تحلیل هوش مصنوعی</p>
+                <p className="text-3xl font-bold text-orange-100 mt-2" data-testid="stat-ai-status">
                   فعال
                 </p>
               </div>
-              <div className="w-10 h-10 bg-accent/10 rounded-lg flex items-center justify-center">
-                <Brain className="w-5 h-5 text-accent" />
+              <div className="w-12 h-12 bg-gradient-to-br from-orange-900/30 to-yellow-900/30 rounded-xl flex items-center justify-center">
+                <Brain className="w-6 h-6 text-orange-300" />
               </div>
             </div>
           </CardContent>
