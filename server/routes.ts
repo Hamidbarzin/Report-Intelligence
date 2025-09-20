@@ -77,10 +77,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Add CSRF protection header requirement for admin routes
   const requireCSRF = (req: any, res: any, next: any) => {
+    // Check for X-Requested-With header
     if (!req.get("X-Requested-With")) {
       return res.status(403).json({ message: "CSRF protection required" });
     }
-    next();
+    
+    // Additional origin validation for admin requests
+    const origin = req.get('Origin');
+    const referer = req.get('Referer');
+    const host = req.get('Host');
+    
+    // Allow requests from same origin
+    if (origin && origin.includes(host)) {
+      return next();
+    }
+    if (referer && referer.includes(host)) {
+      return next();
+    }
+    
+    // For requests without origin/referer (like API tools), allow if X-Requested-With is present
+    if (!origin && !referer) {
+      return next();
+    }
+    
+    return res.status(403).json({ message: "Invalid request origin" });
   };
 
   // Authentication endpoints
