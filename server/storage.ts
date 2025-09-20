@@ -150,8 +150,8 @@ export class MemoryFileStorage implements IFileStorage {
 
 // Create storage instances with safe fallbacks
 function createStorage(): IStorage {
-  // Prefer in-memory storage by default unless explicitly requested to use database
-  if (process.env.USE_DATABASE === 'true' && process.env.DATABASE_URL) {
+  // Use database storage if available, fallback to memory storage
+  if (process.env.DATABASE_URL) {
     try {
       console.log("Using database storage");
       return new DatabaseStorage();

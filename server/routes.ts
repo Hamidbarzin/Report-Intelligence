@@ -51,17 +51,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "File not found" });
       }
 
-      // Set appropriate content type based on file extension
+      // Set appropriate content type and security headers
       const ext = fileName.split('.').pop()?.toLowerCase();
       const contentType = {
         'pdf': 'application/pdf',
-        'html': 'text/html',
+        'html': 'text/plain', // Serve HTML as plain text to prevent XSS
         'jpg': 'image/jpeg',
         'jpeg': 'image/jpeg',
         'png': 'image/png'
       }[ext || ''] || 'application/octet-stream';
 
+      // Force download for HTML files to prevent same-origin execution
+      if (ext === 'html') {
+        res.set('Content-Disposition', 'attachment; filename=' + fileName);
+      }
+      
       res.set('Content-Type', contentType);
+      res.set('X-Content-Type-Options', 'nosniff');
       res.send(buffer);
     } catch (error) {
       console.error('File serving error:', error);
