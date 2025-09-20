@@ -125,7 +125,7 @@ export default function ReportPage() {
           <Link href="/">
             <Button variant="ghost" className="mb-4">
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Dashboard
+              بازگشت به داشبورد
             </Button>
           </Link>
 
@@ -143,7 +143,7 @@ export default function ReportPage() {
 
           <div className="flex items-center gap-2">
             <Badge variant="secondary">
-              {report.status === "published" ? "Published" : "Draft"}
+              {report.status === "published" ? "منتشر شده" : "پیش‌نویس"}
             </Badge>
           </div>
         </div>

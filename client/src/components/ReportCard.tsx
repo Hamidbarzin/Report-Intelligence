@@ -39,7 +39,7 @@ export function ReportCard({ report }: ReportCardProps) {
   const calculateReadTime = (sizeKb: string) => {
     const kb = parseInt(sizeKb);
     const minutes = Math.max(1, Math.round(kb / 200)); // Rough estimate
-    return `${minutes} min read`;
+    return `${minutes} دقیقه مطالعه`;
   };
 
   return (

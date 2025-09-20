@@ -32,8 +32,8 @@ export function AdminPanel() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/me"] });
       toast({
-        title: "Success",
-        description: "Logged out successfully",
+        title: "موفقیت",
+        description: "با موفقیت خارج شدید",
       });
       setLocation("/");
     }
@@ -44,13 +44,13 @@ export function AdminPanel() {
     onSuccess: () => {
       invalidateReports();
       toast({
-        title: "Success",
-        description: "Report analyzed successfully",
+        title: "موفقیت",
+        description: "گزارش با موفقیت تحلیل شد",
       });
     },
     onError: (error: Error) => {
       toast({
-        title: "Analysis Failed",
+        title: "تحلیل ناموفق",
         description: error.message,
         variant: "destructive"
       });
@@ -62,13 +62,13 @@ export function AdminPanel() {
     onSuccess: () => {
       invalidateReports();
       toast({
-        title: "Success",
-        description: "Report published successfully",
+        title: "موفقیت",
+        description: "گزارش با موفقیت منتشر شد",
       });
     },
     onError: (error: Error) => {
       toast({
-        title: "Publish Failed",
+        title: "انتشار ناموفق",
         description: error.message,
         variant: "destructive"
       });
@@ -80,13 +80,13 @@ export function AdminPanel() {
     onSuccess: () => {
       invalidateReports();
       toast({
-        title: "Success",
-        description: "Report deleted successfully",
+        title: "موفقیت",
+        description: "گزارش با موفقیت حذف شد",
       });
     },
     onError: (error: Error) => {
       toast({
-        title: "Delete Failed",
+        title: "حذف ناموفق",
         description: error.message,
         variant: "destructive"
       });
@@ -101,8 +101,8 @@ export function AdminPanel() {
     invalidateReports();
     setActiveTab("manage");
     toast({
-      title: "Upload Complete",
-      description: "Report uploaded successfully. You can now analyze it.",
+      title: "آپلود کامل شد",
+      description: "گزارش با موفقیت آپلود شد. اکنون می‌توانید آن را تحلیل کنید.",
     });
   };
 
@@ -115,7 +115,7 @@ export function AdminPanel() {
   };
 
   const handleDelete = (reportId: number) => {
-    if (confirm("Are you sure you want to delete this report? This action cannot be undone.")) {
+    if (confirm("آیا مطمئن هستید که می‌خواهید این گزارش را حذف کنید؟ این عمل قابل بازگشت نیست.")) {
       deleteMutation.mutate(reportId.toString());
     }
   };

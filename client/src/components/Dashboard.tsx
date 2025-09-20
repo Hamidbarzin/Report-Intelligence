@@ -115,22 +115,22 @@ export function Dashboard() {
           </div>
           <Select value={filterBy} onValueChange={setFilterBy}>
             <SelectTrigger className="w-48" data-testid="select-filter">
-              <SelectValue placeholder="Filter by..." />
+              <SelectValue placeholder="فیلتر بر اساس..." />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Reports</SelectItem>
-              <SelectItem value="high-score">High Score (80+)</SelectItem>
-              <SelectItem value="recent">Recent (7 days)</SelectItem>
+              <SelectItem value="all">همه گزارش‌ها</SelectItem>
+              <SelectItem value="high-score">امتیاز بالا (80+)</SelectItem>
+              <SelectItem value="recent">اخیر (7 روز)</SelectItem>
             </SelectContent>
           </Select>
           <Select value={sortBy} onValueChange={setSortBy}>
             <SelectTrigger className="w-40" data-testid="select-sort">
-              <SelectValue placeholder="Sort by..." />
+              <SelectValue placeholder="مرتب‌سازی بر اساس..." />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="recent">Recent</SelectItem>
-              <SelectItem value="score">Score</SelectItem>
-              <SelectItem value="title">Title</SelectItem>
+              <SelectItem value="recent">جدیدترین</SelectItem>
+              <SelectItem value="score">امتیاز</SelectItem>
+              <SelectItem value="title">عنوان</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -224,7 +224,7 @@ export function Dashboard() {
       {sortedReports.length > 9 && (
         <div className="flex justify-center pt-8">
           <Button variant="outline" data-testid="button-load-more">
-            Load More Reports
+            نمایش گزارش‌های بیشتر
           </Button>
         </div>
       )}

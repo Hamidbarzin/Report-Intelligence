@@ -169,7 +169,7 @@ export default function AIAnalyzeTabs({ report, onUpdate }: AIAnalyzeTabsProps) 
                 <Card>
                   <CardContent className="p-6 text-center">
                     <p className="text-muted-foreground">
-                      Install recharts for chart visualization: <code>npm i recharts</code>
+                      برای نمایش نمودارها recharts را نصب کنید: <code>npm i recharts</code>
                     </p>
                   </CardContent>
                 </Card>
@@ -191,7 +191,7 @@ function KPIsView({ ai }: { ai: any }) {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
-        <span className="text-muted-foreground">Progress Score:</span>
+        <span className="text-muted-foreground">امتیاز پیشرفت:</span>
         <Badge className="text-lg px-3 py-1">
           {ai.score ?? 0}/100
         </Badge>
@@ -210,11 +210,11 @@ function KPIsView({ ai }: { ai: any }) {
                 {k.value} {k.unit || ""}
               </div>
               <div className="text-sm text-muted-foreground">
-                Target: {k.target ?? "-"}
+                هدف: {k.target ?? "-"}
               </div>
               <div className={`text-sm flex items-center gap-1 ${k.delta >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                 {k.delta >= 0 ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
-                Change: {k.delta}
+                تغییر: {k.delta}
               </div>
             </CardContent>
           </Card>
@@ -224,7 +224,7 @@ function KPIsView({ ai }: { ai: any }) {
       {ai.insights?.length && (
         <Card>
           <CardContent className="p-6">
-            <h3 className="font-semibold mb-4">Key Insights</h3>
+            <h3 className="font-semibold mb-4">بینش‌های کلیدی</h3>
             <div className="space-y-2">
               {ai.insights.map((x: any, i: number) => (
                 <div key={i} className="flex items-start gap-2">
@@ -325,7 +325,7 @@ function PlanView({ plan }: { plan: any }) {
   if (!plan) return (
     <Card>
       <CardContent className="p-6">
-        <p className="text-muted-foreground">No action plan available.</p>
+        <p className="text-muted-foreground">هیچ برنامه عملیاتی در دسترس نیست.</p>
       </CardContent>
     </Card>
   );
@@ -334,7 +334,7 @@ function PlanView({ plan }: { plan: any }) {
     <div className="space-y-6">
       <Card>
         <CardContent className="p-6">
-          <h3 className="font-semibold mb-4">Focus Themes</h3>
+          <h3 className="font-semibold mb-4">موضوعات اصلی</h3>
           <div className="flex flex-wrap gap-2">
             {plan.focus_themes?.map((theme: string, i: number) => (
               <Badge key={i} variant="secondary">{theme}</Badge>
@@ -345,26 +345,26 @@ function PlanView({ plan }: { plan: any }) {
 
       <Card>
         <CardContent className="p-6">
-          <h3 className="font-semibold mb-4">Weekly Plan</h3>
+          <h3 className="font-semibold mb-4">برنامه هفتگی</h3>
           <div className="grid md:grid-cols-2 gap-4">
             {plan.weekly_plan?.map((w: any, i: number) => (
               <Card key={i} className="border-l-4 border-l-blue-500">
                 <CardContent className="p-4">
                   <div className="flex items-center gap-2 mb-2">
-                    <Badge>Week {w.week}</Badge>
-                    <span className="text-sm text-muted-foreground">Owner: {w.owner || "-"}</span>
+                    <Badge>هفته {w.week}</Badge>
+                    <span className="text-sm text-muted-foreground">مسئول: {w.owner || "-"}</span>
                   </div>
 
                   <div className="space-y-2">
                     <div>
-                      <span className="font-medium text-sm">Goals:</span>
+                      <span className="font-medium text-sm">اهداف:</span>
                       <ul className="list-disc list-inside text-sm text-muted-foreground">
                         {w.goals?.map((g: string, j: number) => <li key={j}>{g}</li>)}
                       </ul>
                     </div>
 
                     <div>
-                      <span className="font-medium text-sm">Metrics:</span>
+                      <span className="font-medium text-sm">معیارها:</span>
                       <div className="flex flex-wrap gap-1 mt-1">
                         {w.metrics?.map((m: string, j: number) => (
                           <Badge key={j} variant="outline" className="text-xs">{m}</Badge>
@@ -382,7 +382,7 @@ function PlanView({ plan }: { plan: any }) {
       <div className="grid md:grid-cols-2 gap-4">
         <Card>
           <CardContent className="p-6">
-            <h3 className="font-semibold mb-4">Milestones</h3>
+            <h3 className="font-semibold mb-4">نقاط عطف</h3>
             <div className="space-y-2">
               {plan.milestones?.map((m: any, i: number) => (
                 <div key={i} className="flex items-center gap-2">
@@ -397,7 +397,7 @@ function PlanView({ plan }: { plan: any }) {
 
         <Card>
           <CardContent className="p-6">
-            <h3 className="font-semibold mb-4">Risks & Mitigations</h3>
+            <h3 className="font-semibold mb-4">ریسک‌ها و راهکارها</h3>
             <div className="space-y-2">
               {plan.risks_mitigations?.map((r: any, i: number) => (
                 <div key={i} className="text-sm">
