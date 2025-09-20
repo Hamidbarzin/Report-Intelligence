@@ -14,5 +14,5 @@ services:
         value: admin123
       - key: PORT
         value: 10000
-    healthCheckPath: /
+    healthCheckPath: /api/health
     autoDeploy: true
