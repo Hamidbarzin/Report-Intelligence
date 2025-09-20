@@ -92,7 +92,7 @@ export default function ReportPage() {
   const hasAnalysis = analysisData && report.ai_markdown;
   
   // Check if user is admin to show analyze button
-  const isAdmin = document.cookie.includes('ri_admin');
+  const isAdmin = document.cookie.includes('ri_admin') || document.cookie.includes('admin_token');
 
   const getFileIcon = (type: string) => {
     switch (type) {

@@ -2,11 +2,15 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import cookieParser from "cookie-parser";
 import multer from "multer";
+import jwt from 'jsonwebtoken'; // Assuming jwt is available
 import { loginSchema } from "@shared/schema";
 import { requireAdmin, getUser, verifyPassword, signToken } from "./lib/auth";
 import { storage, fileStorage } from "./storage";
 import { extractText } from "./lib/extractors";
 import { analyzeDocument } from "./lib/ai";
+
+// Define JWT_SECRET, assuming it's available in the environment or imported
+const JWT_SECRET = process.env.JWT_SECRET || 'default-secret-key'; // Replace with your actual secret key or ensure it's set
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -19,10 +23,10 @@ const upload = multer({
       "text/html",
       "application/pdf",
       "image/jpeg",
-      "image/jpg", 
+      "image/jpg",
       "image/png"
     ];
-    
+
     if (allowedTypes.includes(file.mimetype)) {
       cb(null, true);
     } else {
@@ -39,7 +43,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const fileName = req.params[0];
       const buffer = await fileStorage.getFile(fileName);
-      
+
       if (!buffer) {
         return res.status(404).json({ message: "File not found" });
       }
@@ -74,13 +78,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/login", async (req, res) => {
     try {
       const { password } = loginSchema.parse(req.body);
-      
+
       if (!verifyPassword(password)) {
         return res.status(401).json({ message: "Invalid password" });
       }
 
       const token = signToken({ role: "admin" });
-      
+
       res.cookie("ri_admin", token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
@@ -138,7 +142,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           // Upload file
           const fileItem = await fileStorage.uploadFile(file, report.id);
           uploadedFiles.push(fileItem);
-          
+
           // Extract text from file
           const extractedText = await extractText(file);
           extractedTexts.push(`File: ${file.originalname}\n${extractedText}`);
@@ -161,8 +165,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error("Upload error:", error);
-      res.status(500).json({ 
-        message: error instanceof Error ? error.message : "Upload failed" 
+      res.status(500).json({
+        message: error instanceof Error ? error.message : "Upload failed"
       });
     }
   });
@@ -171,7 +175,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/analyze/:id", requireCSRF, requireAdmin, async (req, res) => {
     try {
       const reportId = parseInt(req.params.id);
-      
+
       const report = await storage.getReport(reportId);
 
       if (!report) {
@@ -199,7 +203,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
               originalname: fileItem.file_name,
               mimetype: fileItem.type
             } as Express.Multer.File;
-            
+
             const extractedText = await extractText(mockFile);
             extractedTexts.push(`File: ${fileItem.file_name}\n${extractedText}`);
           } else {
@@ -238,8 +242,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
     } catch (error) {
       console.error("Analysis error:", error);
-      res.status(500).json({ 
-        message: error instanceof Error ? error.message : "Analysis failed" 
+      res.status(500).json({
+        message: error instanceof Error ? error.message : "Analysis failed"
       });
     }
   });
@@ -248,7 +252,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/publish/:id", requireCSRF, requireAdmin, async (req, res) => {
     try {
       const reportId = parseInt(req.params.id);
-      
+
       const report = await storage.getReport(reportId);
 
       if (!report) {
@@ -267,8 +271,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ message: "Report published successfully" });
     } catch (error) {
       console.error("Publish error:", error);
-      res.status(500).json({ 
-        message: error instanceof Error ? error.message : "Publishing failed" 
+      res.status(500).json({
+        message: error instanceof Error ? error.message : "Publishing failed"
       });
     }
   });
@@ -277,7 +281,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.delete("/api/delete/:id", requireCSRF, requireAdmin, async (req, res) => {
     try {
       const reportId = parseInt(req.params.id);
-      
+
       const report = await storage.getReport(reportId);
 
       if (!report) {
@@ -301,8 +305,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ message: "Report deleted successfully" });
     } catch (error) {
       console.error("Delete error:", error);
-      res.status(500).json({ 
-        message: error instanceof Error ? error.message : "Deletion failed" 
+      res.status(500).json({
+        message: error instanceof Error ? error.message : "Deletion failed"
       });
     }
   });
@@ -319,20 +323,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get single report endpoint (public read for published, admin for all)
   app.get("/api/report/:id", async (req, res) => {
     try {
       const reportId = parseInt(req.params.id);
-      
+
       const report = await storage.getReport(reportId);
 
-      if (!report || !report.is_published) {
+      if (!report) {
+        return res.status(404).json({ message: "Report not found" });
+      }
+
+      // Check if report is published for public access, or if user is admin
+      const token = req.headers.authorization?.replace('Bearer ', '') ||
+                   req.cookies.ri_admin; // Corrected cookie name to match login
+
+      let isAdmin = false;
+      if (token) {
+        try {
+          jwt.verify(token, JWT_SECRET);
+          isAdmin = true;
+        } catch {
+          // Token invalid
+        }
+      }
+
+      // Allow access if published OR if admin
+      if (!report.is_published && !isAdmin) {
         return res.status(404).json({ message: "Report not found" });
       }
 
       res.json(report);
     } catch (error) {
-      console.error("Report fetch error:", error);
-      res.status(500).json({ message: "Failed to fetch report" });
+      console.error("Get report error:", error);
+      res.status(500).json({
+        message: error instanceof Error ? error.message : "Failed to get report"
+      });
     }
   });
 
