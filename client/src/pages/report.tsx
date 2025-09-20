@@ -36,6 +36,21 @@ export default function ReportPage() {
     enabled: !!id
   });
 
+  // Check if user is admin - MOVED HERE to avoid hooks order issues
+  const { data: userInfo } = useQuery({
+    queryKey: ["user-info"],
+    queryFn: async () => {
+      try {
+        const response = await fetch("/api/me");
+        if (!response.ok) return { role: "public" };
+        return response.json();
+      } catch {
+        return { role: "public" };
+      }
+    }
+  });
+  const isAdmin = userInfo?.role === "admin";
+
   // Handle report data updates
   useEffect(() => {
     if (fetchedReport && !currentReport) {
@@ -80,21 +95,6 @@ export default function ReportPage() {
 
   const analysisData = report.ai_json || null;
   const hasAnalysis = analysisData && typeof analysisData === 'object';
-
-  // Check if user is admin to show analyze button
-  const { data: userInfo } = useQuery({
-    queryKey: ["user-info"],
-    queryFn: async () => {
-      try {
-        const response = await fetch("/api/me");
-        if (!response.ok) return { role: "public" };
-        return response.json();
-      } catch {
-        return { role: "public" };
-      }
-    }
-  });
-  const isAdmin = userInfo?.role === "admin";
 
   const getFileIcon = (type: string) => {
     switch (type) {
