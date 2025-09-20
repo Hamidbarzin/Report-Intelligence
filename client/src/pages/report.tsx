@@ -230,24 +230,24 @@ export default function ReportPage() {
             📋 محتوای گزارش
           </h3>
           
-          {report.content ? (
+          {(report.extracted_text || report.content) ? (
             <div className="space-y-4">
               {/* نمایش خام محتوا */}
               <div className="bg-gray-50 p-4 rounded-lg max-h-96 overflow-y-auto">
                 <pre className="whitespace-pre-wrap text-sm font-mono text-gray-800">
-                  {report.content.substring(0, 2000)}
-                  {report.content.length > 2000 && "..."}
+                  {(report.extracted_text || report.content).substring(0, 2000)}
+                  {(report.extracted_text || report.content).length > 2000 && "..."}
                 </pre>
               </div>
               
               {/* نمایش پردازش شده HTML */}
-              {report.content.includes('<') && (
+              {(report.extracted_text || report.content).includes('<') && (
                 <div className="border-t pt-4">
                   <h4 className="font-medium mb-2">نمایش پردازش شده:</h4>
                   <div 
                     className="prose prose-slate max-w-none dark:prose-invert bg-white p-4 rounded border"
                     dangerouslySetInnerHTML={{ 
-                      __html: report.content
+                      __html: (report.extracted_text || report.content)
                         .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
                         .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '')
                     }}
@@ -257,7 +257,7 @@ export default function ReportPage() {
               
               {/* اطلاعات فایل */}
               <div className="bg-blue-50 p-3 rounded-lg text-sm">
-                <p><strong>حجم محتوا:</strong> {report.content.length.toLocaleString()} کاراکتر</p>
+                <p><strong>حجم محتوا:</strong> {(report.extracted_text || report.content).length.toLocaleString()} کاراکتر</p>
                 <p><strong>نوع فایل:</strong> {report.files?.[0]?.type || 'نامشخص'}</p>
                 <p><strong>وضعیت:</strong> 
                   <span className="text-green-600 font-medium"> ✅ محتوا با موفقیت استخراج شده</span>
