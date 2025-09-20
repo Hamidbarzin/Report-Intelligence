@@ -6,7 +6,10 @@ const JWT_SECRET = process.env.JWT_SECRET || process.env.SESSION_SECRET;
 if (!JWT_SECRET) {
   throw new Error("JWT_SECRET or SESSION_SECRET environment variable is required for secure authentication");
 }
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin123";
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD;
+if (!ADMIN_PASSWORD) {
+  throw new Error("ADMIN_PASSWORD environment variable is required for secure authentication");
+}
 
 export interface AuthenticatedRequest extends Request {
   user?: AdminUser | PublicUser;

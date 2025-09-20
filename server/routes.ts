@@ -87,11 +87,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const referer = req.get('Referer');
     const host = req.get('Host');
     
-    // Allow requests from same origin
-    if (origin && origin.includes(host)) {
+    // Allow requests from exact same origin only
+    const expectedOrigin = `https://${host}`;
+    const expectedOriginHttp = `http://${host}`;
+    
+    if (origin && (origin === expectedOrigin || origin === expectedOriginHttp)) {
       return next();
     }
-    if (referer && referer.includes(host)) {
+    if (referer && (referer.startsWith(expectedOrigin) || referer.startsWith(expectedOriginHttp))) {
       return next();
     }
     
