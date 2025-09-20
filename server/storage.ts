@@ -76,6 +76,13 @@ export class MemStorage implements IStorage {
       updated_at: now,
       files: [] as FileItem[],
       status: "uploaded" as const,
+      extracted_date: null,
+      extracted_text: null,
+      content_url: null,
+      ai_json: null,
+      ai_markdown: null,
+      score: null,
+      is_published: false,
       ...report
     };
     this.reports.set(newReport.id, newReport);

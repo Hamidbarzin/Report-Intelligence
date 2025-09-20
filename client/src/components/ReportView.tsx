@@ -5,11 +5,30 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Star, Download, Share, Eye, FileText, Image, Globe, Calendar, Clock, Target, AlertTriangle, Users, Flag, CheckCircle, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { 
+  ArrowLeft, 
+  Star, 
+  Download, 
+  Share, 
+  Eye, 
+  FileText, 
+  Image, 
+  Globe, 
+  Calendar, 
+  Clock, 
+  Target, 
+  AlertTriangle, 
+  Users, 
+  Flag, 
+  CheckCircle, 
+  TrendingUp, 
+  TrendingDown, 
+  Minus 
+} from "lucide-react";
 import { Link } from "wouter";
 import ChartsBoard from "./ChartsBoard";
 import { getReport } from "@/lib/api";
-import type { Report, KPI, WeeklyGoal, Milestone, RiskMitigation } from "@shared/schema";
+import type { Report } from "@/types";
 
 export function ReportView() {
   const { id } = useParams<{ id: string }>();
@@ -47,275 +66,109 @@ export function ReportView() {
     );
   }
 
+  return <ReportViewContent report={report} activeTab={activeTab} setActiveTab={setActiveTab} />;
+}
+
+interface ReportViewContentProps {
+  report: Report;
+  activeTab: string;
+  setActiveTab: (tab: string) => void;
+}
+
+function ReportViewContent({ report, activeTab, setActiveTab }: ReportViewContentProps) {
   const getFileIcon = (type: string) => {
     switch (type) {
-      case "html": return <Globe className="w-5 h-5" />;
-      case "image": return <Image className="w-5 h-5" />;
-      default: return <FileText className="w-5 h-5" />;
+      case "html": return <Globe className="w-4 h-4" />;
+      case "image": return <Image className="w-4 h-4" />;
+      default: return <FileText className="w-4 h-4" />;
     }
   };
 
-  const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "long",
-      day: "numeric"
-    });
-  };
-
-  const formatFileSize = (sizeKb: number) => {
-    if (sizeKb < 1024) return `${sizeKb} KB`;
-    return `${(sizeKb / 1024).toFixed(1)} MB`;
-  };
-
   return (
-    <div className="space-y-8" data-testid="report-view">
-      {/* Report Header */}
-      <div className="flex items-start justify-between">
-        <div className="flex-1">
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
           <Link href="/">
-            <Button variant="ghost" className="mb-4" data-testid="button-back">
+            <Button variant="outline" size="sm">
               <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Dashboard
+              بازگشت
             </Button>
           </Link>
-          
-          <div className="flex items-center space-x-4 mb-4">
-            <h1 className="text-3xl font-bold tracking-tight" data-testid="text-report-title">
-              {report.title}
-            </h1>
-            {report.score && (
-              <div className="flex items-center space-x-2">
-                <span className="text-2xl font-bold text-accent" data-testid="text-report-score">
-                  {parseFloat(report.score).toFixed(1)}
-                </span>
-                <Star className="w-5 h-5 text-accent fill-current" />
-              </div>
-            )}
-          </div>
-          
-          <div className="flex items-center space-x-6 text-sm text-muted-foreground">
-            <span data-testid="text-publish-date">
-              Published {formatDate(report.upload_date.toString())}
-            </span>
-            <span data-testid="text-file-count">
-              {report.files?.length || 0} files analyzed
-            </span>
-            <span data-testid="text-file-size">
-              {formatFileSize(parseFloat(report.size_kb))}
-            </span>
+          <div>
+            <h1 className="text-3xl font-bold">{report.title}</h1>
+            <p className="text-muted-foreground mt-2">{report.summary}</p>
           </div>
         </div>
-        
-        <div className="flex items-center space-x-3">
-          <Button variant="outline" data-testid="button-export">
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm">
             <Download className="w-4 h-4 mr-2" />
-            Export PDF
+            دانلود
           </Button>
-          <Button data-testid="button-share">
+          <Button variant="outline" size="sm">
             <Share className="w-4 h-4 mr-2" />
-            Share
+            اشتراک
           </Button>
         </div>
       </div>
 
-      {/* Report Tabs */}
-      <Tabs value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="summary" data-testid="tab-summary">Summary</TabsTrigger>
-          <TabsTrigger value="kpis" data-testid="tab-kpis">KPIs</TabsTrigger>
-          <TabsTrigger value="charts" data-testid="tab-charts">Charts</TabsTrigger>
-          <TabsTrigger value="plan" data-testid="tab-plan">Action Plan</TabsTrigger>
-          <TabsTrigger value="files" data-testid="tab-files">Source Files</TabsTrigger>
+      {/* Tabs */}
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+        <TabsList className="grid w-full grid-cols-4">
+          <TabsTrigger value="summary">خلاصه</TabsTrigger>
+          <TabsTrigger value="kpis">شاخص‌ها</TabsTrigger>
+          <TabsTrigger value="trends">روندها</TabsTrigger>
+          <TabsTrigger value="files">فایل‌ها</TabsTrigger>
         </TabsList>
 
-        {/* Summary Tab */}
         <TabsContent value="summary" className="space-y-6">
           <Card>
-            <CardContent className="p-8">
-              <h2 className="text-xl font-semibold mb-6">Executive Summary</h2>
-              <div 
-                className="prose prose-slate max-w-none dark:prose-invert whitespace-pre-wrap"
-                data-testid="content-summary"
-              >
-                {report.ai_markdown || "No summary available."}
-              </div>
+            <CardContent className="p-6">
+              <h3 className="text-xl font-semibold mb-4">خلاصه گزارش</h3>
+              <p className="text-muted-foreground leading-relaxed">
+                {report.summary}
+              </p>
             </CardContent>
           </Card>
         </TabsContent>
 
-        {/* KPIs Tab */}
         <TabsContent value="kpis" className="space-y-6">
-          {report.ai_json?.kpis && report.ai_json.kpis.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" data-testid="kpis-grid">
-              {report.ai_json.kpis.map((kpi: KPI, index: number) => (
-                <Card key={index} data-testid={`kpi-card-${index}`}>
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-sm font-medium text-muted-foreground">{kpi.name}</h3>
-                      {kpi.trend === "up" && <TrendingUp className="w-5 h-5 text-accent" />}
-                      {kpi.trend === "down" && <TrendingDown className="w-5 h-5 text-destructive" />}
-                      {kpi.trend === "stable" && <Minus className="w-5 h-5 text-muted-foreground" />}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {report.kpis.map((kpi, index) => (
+              <Card key={index}>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium">{kpi.key}</p>
+                      <p className="text-2xl font-bold">{kpi.value}</p>
                     </div>
-                    <div className="space-y-2">
-                      <div className="text-2xl font-bold text-foreground">{kpi.value}</div>
-                      <div className="text-sm text-muted-foreground">{kpi.description}</div>
-                      <div className="w-full bg-muted rounded-full h-2">
-                        <div 
-                          className="bg-accent h-2 rounded-full transition-all duration-300" 
-                          style={{ width: `${Math.min(100, Math.max(0, kpi.percentage))}%` }}
-                        />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">No KPIs available for this report.</p>
-            </div>
-          )}
+                    {kpi.unit && (
+                      <Badge variant="secondary">{kpi.unit}</Badge>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </TabsContent>
 
-        {/* Charts Tab */}
-        <TabsContent value="charts" className="space-y-8">
-          {report.ai_json?.charts ? (
-            <ChartsBoard data={report.ai_json} />
-          ) : (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">No charts available for this report.</p>
-            </div>
-          )}
+        <TabsContent value="trends" className="space-y-6">
+          <ChartsBoard />
         </TabsContent>
 
-        {/* Action Plan Tab */}
-        <TabsContent value="plan" className="space-y-8">
-          {report.ai_json?.next_month_plan ? (
-            <Card>
-              <CardContent className="p-8">
-                <h2 className="text-xl font-semibold mb-6">30-Day Action Plan</h2>
-                
-                {/* Weekly Plan Grid */}
-                {report.ai_json.next_month_plan.weekly_plan && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                    {report.ai_json.next_month_plan.weekly_plan.map((week: WeeklyGoal[], weekIndex: number) => (
-                      <div key={weekIndex} className="space-y-4" data-testid={`week-${weekIndex + 1}`}>
-                        <div className="flex items-center space-x-2 mb-4">
-                          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                            <span className="text-sm font-bold text-primary-foreground">{weekIndex + 1}</span>
-                          </div>
-                          <h3 className="font-semibold">Week {weekIndex + 1}</h3>
-                        </div>
-                        
-                        <div className="space-y-3">
-                          {week.map((goal: WeeklyGoal, goalIndex: number) => (
-                            <div key={goalIndex} className="p-3 bg-muted rounded-lg">
-                              <h4 className="text-sm font-medium mb-1">{goal.title}</h4>
-                              <p className="text-xs text-muted-foreground">{goal.description}</p>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* Milestones & Risks */}
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                  {/* Key Milestones */}
-                  <div>
-                    <h3 className="text-lg font-semibold mb-4">Key Milestones</h3>
-                    <div className="space-y-4" data-testid="milestones-list">
-                      {report.ai_json.next_month_plan.milestones?.map((milestone: Milestone, index: number) => (
-                        <div key={index} className="flex items-start space-x-3" data-testid={`milestone-${index}`}>
-                          <div className="w-6 h-6 bg-primary rounded-full flex items-center justify-center mt-0.5">
-                            {milestone.completed ? (
-                              <CheckCircle className="w-3 h-3 text-primary-foreground" />
-                            ) : (
-                              <Target className="w-3 h-3 text-primary-foreground" />
-                            )}
-                          </div>
-                          <div className="flex-1">
-                            <h4 className="font-medium text-sm">{milestone.title}</h4>
-                            <p className="text-xs text-muted-foreground">{milestone.date}</p>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Risk Mitigations */}
-                  <div>
-                    <h3 className="text-lg font-semibold mb-4">Risk Mitigations</h3>
-                    <div className="space-y-4" data-testid="risks-list">
-                      {report.ai_json.next_month_plan.risks_mitigations?.map((risk: RiskMitigation, index: number) => (
-                        <div 
-                          key={index} 
-                          className={`p-4 border rounded-lg ${
-                            risk.severity === "high" ? "bg-destructive/10 border-destructive/20" :
-                            risk.severity === "medium" ? "bg-chart-4/10 border-chart-4/20" :
-                            "bg-chart-2/10 border-chart-2/20"
-                          }`}
-                          data-testid={`risk-${index}`}
-                        >
-                          <div className="flex items-start space-x-3">
-                            <AlertTriangle className={`w-5 h-5 mt-0.5 ${
-                              risk.severity === "high" ? "text-destructive" :
-                              risk.severity === "medium" ? "text-chart-4" :
-                              "text-chart-2"
-                            }`} />
-                            <div className="flex-1">
-                              <h4 className={`font-medium text-sm ${
-                                risk.severity === "high" ? "text-destructive" :
-                                risk.severity === "medium" ? "text-chart-4" :
-                                "text-chart-2"
-                              }`}>
-                                {risk.title}
-                              </h4>
-                              <p className="text-xs text-muted-foreground mt-1">{risk.mitigation}</p>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ) : (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">No action plan available for this report.</p>
-            </div>
-          )}
-        </TabsContent>
-
-        {/* Source Files Tab */}
         <TabsContent value="files" className="space-y-6">
           {report.files && report.files.length > 0 ? (
-            <div className="space-y-4" data-testid="files-list">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {report.files.map((file, index) => (
-                <Card key={index} data-testid={`file-card-${index}`}>
-                  <CardContent className="p-6">
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center space-x-4">
-                        <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                          {getFileIcon(file.type)}
-                        </div>
-                        <div>
-                          <h3 className="font-medium">{file.file_name}</h3>
-                          <p className="text-sm text-muted-foreground">
-                            {file.type.toUpperCase()} • {formatFileSize(file.size_kb)}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <Button variant="ghost" size="sm" data-testid={`button-view-file-${index}`}>
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                        <Button variant="ghost" size="sm" data-testid={`button-download-file-${index}`}>
-                          <Download className="w-4 h-4" />
-                        </Button>
+                <Card key={index}>
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-3">
+                      {getFileIcon(file.type)}
+                      <div className="flex-1">
+                        <p className="font-medium">{file.file_name}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {(file.size_kb / 1024).toFixed(1)} MB
+                        </p>
                       </div>
                     </div>
                   </CardContent>
@@ -323,99 +176,15 @@ export function ReportView() {
               ))}
             </div>
           ) : (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">No source files available for this report.</p>
-            </div>
+            <Card>
+              <CardContent className="p-6 text-center">
+                <FileText className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                <p className="text-muted-foreground">هیچ فایلی یافت نشد</p>
+              </CardContent>
+            </Card>
           )}
         </TabsContent>
       </Tabs>
-    </div>
-  );
-}
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { FileText, AlertTriangle, CheckCircle } from "lucide-react";
-
-interface ReportViewProps {
-  report: any;
-}
-
-export default function ReportView({ report }: ReportViewProps) {
-  if (!report) return null;
-
-  return (
-    <div className="space-y-6">
-      {/* محتوای اصلی */}
-      {report.content ? (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <FileText className="h-5 w-5" />
-              📋 محتوای گزارش
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div 
-              className="prose prose-slate max-w-none dark:prose-invert"
-              dangerouslySetInnerHTML={{ __html: report.content }}
-            />
-          </CardContent>
-        </Card>
-      ) : (
-        <Card>
-          <CardContent className="p-6 text-center">
-            <div className="action-urgent">
-              <AlertTriangle className="h-8 w-8 text-red-500 mx-auto mb-3" />
-              <h3 className="text-lg font-semibold text-red-800 mb-2">⚠️ مشکل در خواندن فایل</h3>
-              <div className="text-sm text-red-600 space-y-2">
-                <p>• HTML ممکنه به درستی parse نشه</p>
-                <p>• Encoding مشکل داشته باشه (UTF-8)</p>
-                <p>• فایل خراب یا ناقص باشه</p>
-                <p>• محتوا در دیتابیس ذخیره نمی‌شه</p>
-                <p>• فیلد content خالی میمونه</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* اطلاعات فایل */}
-      {report.files && report.files.length > 0 && (
-        <Card>
-          <CardHeader>
-            <CardTitle>📁 فایل‌های منبع</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {report.files.map((file: any, idx: number) => (
-              <div key={idx} className="flex items-center justify-between p-3 border rounded-lg mb-2">
-                <div>
-                  <p className="font-medium">{file.file_name}</p>
-                  <p className="text-sm text-gray-500">
-                    {file.type} • {file.size_kb} KB
-                  </p>
-                </div>
-                <Badge variant="outline">{file.type}</Badge>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      )}
-
-      {/* وضعیت پردازش */}
-      <Card>
-        <CardContent className="p-6">
-          <div className="action-success">
-            <CheckCircle className="h-6 w-6 text-green-500 mb-2" />
-            <h4 className="font-semibold mb-2">✅ اقدامات پیشنهادی:</h4>
-            <div className="text-sm space-y-1">
-              <p>• فایل size limit چک کن</p>
-              <p>• MIME type رو درست تنظیم کن</p>
-              <p>• Error handling اضافه کن</p>
-              <p>• Loading state نشون بده</p>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }

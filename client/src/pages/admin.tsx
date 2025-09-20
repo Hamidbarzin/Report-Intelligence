@@ -17,7 +17,7 @@ export default function AdminPage() {
     );
   }
 
-  if (user && 'role' in user && user.role === "admin") {
+  if (user && typeof user === 'object' && user.role === "admin") {
     return <AdminPanel />;
   }
 

@@ -103,6 +103,9 @@ export type ReportType = {
   score?: string | null;
   updated_at: Date;
   is_published: boolean;
+  summary?: string;
+  kpis?: KPI[];
+  created_at?: Date;
 };
 
 // Auth schemas

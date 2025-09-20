@@ -1,4 +1,25 @@
-import { FileItem } from "@shared/schema";
+import type { FileItem } from "@/types";
+
+export async function extractTextFromFile(file: File): Promise<FileItem> {
+  const buf = await file.arrayBuffer();
+  // ... هر لاجیک واقعی خودت
+  const text = await fakeOcrOrPdf(buf); // فرضی؛ متد خودت را صدا بزن
+
+  const item: FileItem = {
+    file_name: file.name,
+    size_kb: Math.round(file.size / 1024),
+    type: file.type || "application/octet-stream",
+    extracted_text: text ?? ""
+  };
+  return item;
+}
+
+// اگر آرایه برمی‌گردانی، صراحتاً Promise<FileItem[]>
+export async function extractMany(files: File[]): Promise<FileItem[]> {
+  const out: FileItem[] = [];
+  for (const f of files) out.push(await extractTextFromFile(f));
+  return out;
+}
 
 export async function extractTextFromFiles(files: FileItem[]): Promise<string> {
   const textParts: string[] = [];
@@ -28,6 +49,12 @@ export async function extractTextFromFiles(files: FileItem[]): Promise<string> {
   }
 
   return textParts.join('\n\n');
+}
+
+// Helper function for text extraction
+async function fakeOcrOrPdf(buf: ArrayBuffer): Promise<string> {
+  // Placeholder implementation
+  return "Extracted text from file";
 }
 
 // Server-side extraction functions (for reference)

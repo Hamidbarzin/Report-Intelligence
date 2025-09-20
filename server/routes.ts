@@ -193,8 +193,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       // Upload files to Supabase Storage and extract text
-      const uploadedFiles = [];
-      let extractedTexts = [];
+      const uploadedFiles: any[] = [];
+      let extractedTexts: string[] = [];
 
       for (const file of files) {
         try {

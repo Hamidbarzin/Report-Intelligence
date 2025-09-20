@@ -9,9 +9,9 @@ import { Calendar, Search, Filter, BarChart3, TrendingUp, FileText, Clock, Star 
 import { Link } from "wouter";
 import { format } from "date-fns";
 
-import { ReportType } from "@shared/schema";
+import type { Report, FileItem } from "@/types";
 
-type AnalysisReport = Pick<ReportType, 'id' | 'title' | 'upload_date' | 'status' | 'score' | 'ai_json' | 'ai_markdown'>;
+type AnalysisReport = Report;
 
 export default function AnalysisPage() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -37,7 +37,7 @@ export default function AnalysisPage() {
       return matchesSearch && matchesStatus;
     })
     .sort((a: AnalysisReport, b: AnalysisReport) => 
-      new Date(b.upload_date).getTime() - new Date(a.upload_date).getTime()
+      new Date(b.upload_date as string).getTime() - new Date(a.upload_date as string).getTime()
     );
 
   const analyzedReports = filteredReports.filter((r: AnalysisReport) => r.ai_json);
@@ -63,7 +63,7 @@ export default function AnalysisPage() {
             <div className="flex items-center gap-4 text-sm text-muted-foreground">
               <div className="flex items-center gap-1">
                 <Calendar className="w-4 h-4" />
-                {formatDate(report.upload_date)}
+                {formatDate(String(report.created_at))}
               </div>
               {report.score && (
                 <div className="flex items-center gap-1">
