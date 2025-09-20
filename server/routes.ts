@@ -335,18 +335,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Check if report is published for public access, or if user is admin
-      const token = req.headers.authorization?.replace('Bearer ', '') ||
-                   req.cookies.ri_admin; // Corrected cookie name to match login
-
-      let isAdmin = false;
-      if (token) {
-        try {
-          jwt.verify(token, JWT_SECRET);
-          isAdmin = true;
-        } catch {
-          // Token invalid
-        }
-      }
+      const user = getUser(req);
+      const isAdmin = user.role === "admin";
 
       // Allow access if published OR if admin
       if (!report.is_published && !isAdmin) {
