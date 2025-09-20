@@ -49,9 +49,9 @@ app.use((req, res, next) => {
   });
 
   // Setup static files after API routes in production
-  // if (app.get("env") === "production") {
-  //   serveStatic(app);
-  // }
+  if (app.get("env") === "production") {
+    serveStatic(app);
+  }
 
   // Setup vite in development after API routes
   if (app.get("env") === "development") {
