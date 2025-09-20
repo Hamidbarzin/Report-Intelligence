@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useParams } from "wouter";
 import { Card, CardContent } from "@/components/ui/card";
@@ -33,13 +33,15 @@ export default function ReportPage() {
       }
       return response.json();
     },
-    enabled: !!id,
-    onSuccess: (data) => {
-      if (!currentReport) {
-        setCurrentReport(data);
-      }
-    }
+    enabled: !!id
   });
+
+  // Handle report data updates
+  useEffect(() => {
+    if (fetchedReport && !currentReport) {
+      setCurrentReport(fetchedReport);
+    }
+  }, [fetchedReport, currentReport]);
 
   const report = currentReport || fetchedReport;
   // State to hold the report data, used by SmartActionButtons
