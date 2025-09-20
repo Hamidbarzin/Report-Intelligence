@@ -146,6 +146,32 @@ export default function ReportPage() {
         </div>
       </div>
 
+      {/* Debug Info - برای بررسی وضعیت */}
+      {process.env.NODE_ENV === 'development' && (
+        <Card className="mb-6 border-yellow-200 bg-yellow-50">
+          <CardContent className="p-4">
+            <h3 className="text-sm font-semibold text-yellow-800 mb-2">🔍 اطلاعات دیباگ (حالت توسعه)</h3>
+            <div className="text-xs text-yellow-700 space-y-1">
+              <p><strong>ID گزارش:</strong> {report.id}</p>
+              <p><strong>عنوان:</strong> {report.title}</p>
+              <p><strong>حجم محتوا:</strong> {report.content?.length || 0} کاراکتر</p>
+              <p><strong>نوع فایل:</strong> {report.files?.[0]?.type || 'نامشخص'}</p>
+              <p><strong>وضعیت AI:</strong> {report.ai_json ? '✅ تحلیل شده' : '❌ تحلیل نشده'}</p>
+              <p><strong>امتیاز:</strong> {report.score || 0}/100</p>
+              <p><strong>آخرین بروزرسانی:</strong> {new Date(report.upload_date).toLocaleString('fa-IR')}</p>
+              {report.content && (
+                <details className="mt-2">
+                  <summary className="cursor-pointer text-yellow-600">نمایش 200 کاراکتر اول محتوا</summary>
+                  <pre className="mt-2 p-2 bg-white rounded text-xs overflow-x-auto">
+                    {report.content.substring(0, 200)}...
+                  </pre>
+                </details>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* AI Analysis Component */}
       <AIAnalyzeTabs report={report} onUpdate={handleReportUpdate} />
 
@@ -196,39 +222,70 @@ export default function ReportPage() {
         </Card>
       )}
 
-      {/* محتوای اصلی گزارش */}
-      {report.content && (
-        <Card className="mb-6">
-          <CardContent className="p-6">
-            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-              <FileText className="h-5 w-5" />
-              📋 محتوای گزارش
-            </h3>
-            <div 
-              className="prose prose-slate max-w-none dark:prose-invert"
-              dangerouslySetInnerHTML={{ __html: report.content }}
-            />
-          </CardContent>
-        </Card>
-      )}
-
-      {/* اگر محتوا خالی است */}
-      {!report.content && (
-        <Card className="mb-6">
-          <CardContent className="p-6 text-center">
-            <div className="action-urgent bg-red-50 border border-red-200 rounded-lg p-6">
-              <AlertTriangle className="h-8 w-8 text-red-500 mx-auto mb-3" />
-              <h3 className="text-lg font-semibold text-red-800 mb-2">⚠️ محتوا یافت نشد</h3>
-              <p className="text-red-600 mb-4">محتوای فایل HTML به درستی استخراج نشده است.</p>
-              <div className="text-sm text-red-500 space-y-1">
-                <p>• بررسی کنید فایل HTML به درستی آپلود شده باشد</p>
-                <p>• Encoding فایل باید UTF-8 باشد</p>
-                <p>• فایل نباید خراب یا ناقص باشد</p>
+      {/* نمایش محتوای گزارش */}
+      <Card className="mb-6">
+        <CardContent className="p-6">
+          <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+            <FileText className="h-5 w-5" />
+            📋 محتوای گزارش
+          </h3>
+          
+          {report.content ? (
+            <div className="space-y-4">
+              {/* نمایش خام محتوا */}
+              <div className="bg-gray-50 p-4 rounded-lg max-h-96 overflow-y-auto">
+                <pre className="whitespace-pre-wrap text-sm font-mono text-gray-800">
+                  {report.content.substring(0, 2000)}
+                  {report.content.length > 2000 && "..."}
+                </pre>
+              </div>
+              
+              {/* نمایش پردازش شده HTML */}
+              {report.content.includes('<') && (
+                <div className="border-t pt-4">
+                  <h4 className="font-medium mb-2">نمایش پردازش شده:</h4>
+                  <div 
+                    className="prose prose-slate max-w-none dark:prose-invert bg-white p-4 rounded border"
+                    dangerouslySetInnerHTML={{ 
+                      __html: report.content
+                        .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+                        .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '')
+                    }}
+                  />
+                </div>
+              )}
+              
+              {/* اطلاعات فایل */}
+              <div className="bg-blue-50 p-3 rounded-lg text-sm">
+                <p><strong>حجم محتوا:</strong> {report.content.length.toLocaleString()} کاراکتر</p>
+                <p><strong>نوع فایل:</strong> {report.files?.[0]?.type || 'نامشخص'}</p>
+                <p><strong>وضعیت:</strong> 
+                  <span className="text-green-600 font-medium"> ✅ محتوا با موفقیت استخراج شده</span>
+                </p>
               </div>
             </div>
-          </CardContent>
-        </Card>
-      )}
+          ) : (
+            <div className="action-urgent">
+              <AlertTriangle className="h-8 w-8 text-red-500 mx-auto mb-3" />
+              <h3 className="text-lg font-semibold text-red-800 mb-2">⚠️ محتوا خالی است</h3>
+              <div className="text-sm text-red-600 space-y-2">
+                <p><strong>مشکلات احتمالی:</strong></p>
+                <p>🔍 فایل به درستی parse نشده</p>
+                <p>🔤 مشکل Encoding (باید UTF-8 باشد)</p>
+                <p>📄 فایل خراب یا ناقص</p>
+                <p>💾 مشکل در ذخیره‌سازی دیتابیس</p>
+                
+                <div className="mt-4 p-3 bg-blue-50 rounded">
+                  <p><strong>🛠️ راه‌حل‌های پیشنهادی:</strong></p>
+                  <p>• فایل HTML را مجدداً آپلود کنید</p>
+                  <p>• از فایل‌های کوچک‌تر (زیر 1MB) استفاده کنید</p>
+                  <p>• Console browser را چک کنید</p>
+                </div>
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Floating Action Button */}
       <FloatingActionButton

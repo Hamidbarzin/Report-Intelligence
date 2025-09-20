@@ -1,8 +1,9 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Brain, Plus, BarChart3, Target, Download } from "lucide-react";
+import { X, Zap } from "lucide-react";
+
 
 interface FloatingActionButtonProps {
   onAction: (action: string) => void;
@@ -19,7 +20,7 @@ export default function FloatingActionButton({ onAction }: FloatingActionButtonP
   ];
 
   return (
-    <div className="fixed bottom-6 right-6 z-50">
+    <div className="fixed bottom-6 left-6 z-50">
       {isOpen && (
         <Card className="mb-4 shadow-lg">
           <CardContent className="p-2">
@@ -43,14 +44,14 @@ export default function FloatingActionButton({ onAction }: FloatingActionButtonP
           </CardContent>
         </Card>
       )}
-      
+
       <Button
         onClick={() => setIsOpen(!isOpen)}
-        className={`h-14 w-14 rounded-full shadow-lg transition-transform ${
+        className={`h-16 w-16 rounded-full shadow-xl transition-transform ${
           isOpen ? "rotate-45" : ""
-        } bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700`}
+        } bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700`}
       >
-        <Plus className="h-6 w-6" />
+        {isOpen ? <X className="h-7 w-7" /> : <Plus className="h-7 w-7" />}
       </Button>
     </div>
   );

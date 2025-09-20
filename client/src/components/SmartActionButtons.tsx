@@ -30,13 +30,26 @@ export default function SmartActionButtons({ report, onAnalyze, onUpdate }: Smar
   const hasAI = report?.ai_json;
   const score = hasAI ? report.ai_json.score || 0 : 0;
 
+  // بررسی وضعیت محتوا
+  const hasContent = report?.content && report.content.length > 0;
+  const contentSize = report?.content?.length || 0;
+
   const handleQuickAnalysis = async () => {
+    if (!hasContent) {
+      toast({
+        title: "⚠️ محتوا موجود نیست",
+        description: "ابتدا فایلی آپلود کنید که محتوا داشته باشد",
+        variant: "destructive"
+      });
+      return;
+    }
+
     setLoading("analysis");
     try {
       onAnalyze?.();
       toast({
-        title: "🧠 تحلیل هوشمند",
-        description: "تحلیل با هوش مصنوعی آغاز شد"
+        title: "🧠 تحلیل هوشمند آغاز شد",
+        description: `در حال تحلیل ${contentSize.toLocaleString()} کاراکتر محتوا...`
       });
     } catch (error) {
       toast({
