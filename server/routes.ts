@@ -37,6 +37,34 @@ const upload = multer({
 export async function registerRoutes(app: Express): Promise<Server> {
   app.use(cookieParser());
 
+  // Serve object storage files 
+  app.get("/objects/:objectPath(*)", requireAdmin, async (req, res) => {
+    try {
+      const objectPath = req.params.objectPath || "";
+      const buffer = await fileStorage.getFile(objectPath);
+
+      if (!buffer) {
+        return res.status(404).json({ message: "File not found" });
+      }
+
+      // Set appropriate content type and security headers
+      const ext = objectPath.split('.').pop()?.toLowerCase() || '';
+      const contentType = ext === 'html' ? 'text/plain' : 'application/octet-stream';
+
+      // Force download for HTML files to prevent same-origin execution
+      if (ext === 'html') {
+        res.set('Content-Disposition', 'attachment; filename=' + objectPath.split('/').pop());
+      }
+      
+      res.set('Content-Type', contentType);
+      res.set('X-Content-Type-Options', 'nosniff');
+      res.send(buffer);
+    } catch (error) {
+      console.error('Object file serving error:', error);
+      res.status(500).json({ message: "Failed to serve file" });
+    }
+  });
+
   // Serve in-memory uploaded files
   app.get("/uploads/:fileName(*)", async (req, res) => {
     try {

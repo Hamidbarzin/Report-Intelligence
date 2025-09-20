@@ -1,19 +1,23 @@
 import { createClient } from "@supabase/supabase-js";
 import type { FileItem } from "@shared/schema";
 
-const supabaseUrl = process.env.VITE_SUPABASE_URL!;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!;
+const supabaseUrl = process.env.VITE_SUPABASE_URL;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-if (!supabaseUrl || !supabaseServiceKey) {
-  throw new Error("Supabase configuration missing");
+let supabase: any = null;
+
+if (supabaseUrl && supabaseServiceKey) {
+  supabase = createClient(supabaseUrl, supabaseServiceKey);
 }
-
-const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
 export async function uploadFile(
   file: Express.Multer.File,
   reportId: number
 ): Promise<FileItem> {
+  if (!supabase) {
+    throw new Error("Supabase not configured");
+  }
+  
   const fileName = `${reportId}/${Date.now()}-${file.originalname}`;
   
   const { data, error } = await supabase.storage
@@ -42,6 +46,10 @@ export async function uploadFile(
 }
 
 export async function deleteFile(url: string): Promise<void> {
+  if (!supabase) {
+    return; // Silently ignore if Supabase not configured
+  }
+  
   const path = extractPathFromUrl(url);
   if (!path) return;
 

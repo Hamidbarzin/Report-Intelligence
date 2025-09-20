@@ -1,6 +1,9 @@
 import { db } from "./lib/supabase";
 import { reports, type Report, type InsertReport, type FileItem } from "@shared/schema";
 import { eq, desc } from "drizzle-orm";
+import * as supabaseStorage from "./lib/storage";
+import { ObjectStorageService, objectStorageClient } from "./objectStorage";
+import { setObjectAclPolicy } from "./objectAcl";
 
 export interface IStorage {
   // Report methods
@@ -112,6 +115,102 @@ export class MemStorage implements IStorage {
   }
 }
 
+export class ObjectFileStorage implements IFileStorage {
+  private objectStorage = new ObjectStorageService();
+
+  async uploadFile(file: Express.Multer.File, reportId: number): Promise<FileItem> {
+    const privateDir = this.objectStorage.getPrivateObjectDir();
+    const fileName = `uploads/${reportId}/${Date.now()}-${file.originalname}`;
+    const fullPath = `${privateDir}/${fileName}`;
+    
+    const { bucketName, objectName } = this.parseObjectPath(fullPath);
+    const bucket = objectStorageClient.bucket(bucketName);
+    const objectFile = bucket.file(objectName);
+
+    // Upload file buffer to object storage
+    await objectFile.save(file.buffer, {
+      metadata: {
+        contentType: file.mimetype,
+      },
+    });
+
+    // Set ACL policy for the file (make it accessible to admin)
+    await setObjectAclPolicy(objectFile, {
+      owner: "admin",
+      visibility: "private"
+    });
+
+    const fileType = this.getFileType(file.mimetype);
+    const url = `/objects/${fileName}`;
+
+    return {
+      type: fileType,
+      url,
+      file_name: file.originalname,
+      size_kb: Math.round(file.size / 1024)
+    };
+  }
+
+  async deleteFile(url: string): Promise<void> {
+    try {
+      const objectFile = await this.objectStorage.getObjectEntityFile(url);
+      await objectFile.delete();
+    } catch (error) {
+      console.error("Failed to delete object file:", error);
+    }
+  }
+
+  async getFile(fileName: string): Promise<Buffer | null> {
+    try {
+      const objectPath = `/objects/${fileName}`;
+      const objectFile = await this.objectStorage.getObjectEntityFile(objectPath);
+      const [fileBuffer] = await objectFile.download();
+      return fileBuffer;
+    } catch (error) {
+      console.error("Failed to get object file:", error);
+      return null;
+    }
+  }
+
+  private parseObjectPath(path: string): { bucketName: string; objectName: string } {
+    if (!path.startsWith("/")) {
+      path = `/${path}`;
+    }
+    const pathParts = path.split("/");
+    if (pathParts.length < 3) {
+      throw new Error("Invalid path: must contain at least a bucket name");
+    }
+
+    const bucketName = pathParts[1];
+    const objectName = pathParts.slice(2).join("/");
+
+    return { bucketName, objectName };
+  }
+
+  private getFileType(mimetype: string): "html" | "pdf" | "image" {
+    if (mimetype === "text/html") return "html";
+    if (mimetype === "application/pdf") return "pdf";
+    if (mimetype.startsWith("image/")) return "image";
+    throw new Error(`Unsupported file type: ${mimetype}`);
+  }
+}
+
+export class SupabaseFileStorage implements IFileStorage {
+  async uploadFile(file: Express.Multer.File, reportId: number): Promise<FileItem> {
+    return await supabaseStorage.uploadFile(file, reportId);
+  }
+
+  async deleteFile(url: string): Promise<void> {
+    return await supabaseStorage.deleteFile(url);
+  }
+
+  async getFile(fileName: string): Promise<Buffer | null> {
+    // For Supabase storage, files are served directly via public URLs
+    // This method is not used for Supabase but needed for interface compatibility
+    return null;
+  }
+}
+
 export class MemoryFileStorage implements IFileStorage {
   private files: Map<string, Buffer> = new Map();
 
@@ -167,7 +266,27 @@ function createStorage(): IStorage {
 }
 
 function createFileStorage(): IFileStorage {
-  // Use in-memory file storage by default
+  // Try to use Object Storage first (persistent storage)
+  if (process.env.PRIVATE_OBJECT_DIR && process.env.DEFAULT_OBJECT_STORAGE_BUCKET_ID) {
+    try {
+      console.log("Using Object Storage for file storage");
+      return new ObjectFileStorage();
+    } catch (error) {
+      console.warn("Object Storage failed, trying alternatives:", error);
+    }
+  }
+
+  // Try to use Supabase storage if configured
+  if (process.env.VITE_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY) {
+    try {
+      console.log("Using Supabase file storage");
+      return new SupabaseFileStorage();
+    } catch (error) {
+      console.warn("Supabase file storage failed, falling back to memory storage:", error);
+    }
+  }
+  
+  console.log("Using in-memory file storage");
   return new MemoryFileStorage();
 }
 
