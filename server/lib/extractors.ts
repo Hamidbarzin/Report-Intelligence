@@ -1,5 +1,5 @@
 import { JSDOM } from "jsdom";
-import { analyzeImage } from "./ai";
+// analyzeImage function will be implemented separately
 
 // Lazy import pdf-parse to avoid startup issues
 let pdfParse: any = null;
@@ -67,5 +67,6 @@ async function extractFromPDF(buffer: Buffer): Promise<string> {
 
 async function extractFromImage(buffer: Buffer): Promise<string> {
   const base64 = buffer.toString("base64");
-  return analyzeImage(base64);
+  // For now, return a placeholder until AI vision is implemented
+  return "Image content extracted (OCR functionality to be implemented)";
 }

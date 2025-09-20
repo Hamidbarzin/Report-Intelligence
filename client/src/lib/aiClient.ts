@@ -2,8 +2,8 @@
 // It's here for organization but will be moved to server-side in actual implementation
 
 import OpenAI from "openai";
-import { jsonSafeParse } from "./jsonSafeParse";
-import type { AIAnalysisResult } from "@shared/schema";
+import { jsonSafeParse } from "./jsonSafeParse.js";
+import type { AnalysisData } from "@shared/analysisSchema";
 
 const openai = new OpenAI({ 
   apiKey: process.env.LLM_API_KEY || process.env.OPENAI_API_KEY 
@@ -126,7 +126,7 @@ export async function analyzeWithAI(corpus: string) {
     });
 
     const aiJsonText = response.choices[0].message.content || "{}";
-    const aiJson = jsonSafeParse(aiJsonText, AI_ANALYSIS_SCHEMA) as AIAnalysisResult;
+    const aiJson = jsonSafeParse(aiJsonText) as AnalysisData;
 
     // Generate executive summary
     const summaryResponse = await openai.chat.completions.create({

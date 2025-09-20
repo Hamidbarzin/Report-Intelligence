@@ -25,28 +25,6 @@ export function jsonSafeParse(jsonString: string): any {
     }
   }
 }
-import { AnalysisSchema } from "@shared/analysisSchema";
-
-export function jsonSafeParse(raw: string): any {
-  try {
-    return JSON.parse(raw);
-  } catch (error) {
-    // Try basic repairs
-    try {
-      let repaired = raw
-        .replace(/,\s*}/g, '}')  // Remove trailing commas in objects
-        .replace(/,\s*]/g, ']')  // Remove trailing commas in arrays
-        .replace(/'/g, '"')      // Replace single quotes with double quotes
-        .replace(/([{,]\s*)(\w+):/g, '$1"$2":'); // Add quotes to unquoted keys
-      
-      return JSON.parse(repaired);
-    } catch (repairError) {
-      console.error('Failed to parse JSON:', error);
-      // Return a default structure that matches the schema
-      return getDefaultAnalysisData();
-    }
-  }
-}
 
 function getDefaultAnalysisData() {
   return {

@@ -1,6 +1,6 @@
 
 import { AnalysisSchema } from "@shared/analysisSchema";
-import { jsonSafeParse } from "./jsonSafeParse";
+import { jsonSafeParse } from "./jsonSafeParse.js";
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
