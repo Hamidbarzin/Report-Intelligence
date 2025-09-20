@@ -5,8 +5,8 @@ import { jsonSafeParse } from "./jsonSafeParse.js";
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
 export async function analyzeDocument(corpus: string) {
-  if (!OPENAI_API_KEY) {
-    console.warn("No OpenAI API key found, using sample data");
+  if (!OPENAI_API_KEY || OPENAI_API_KEY.includes('your_')) {
+    console.warn("No valid OpenAI API key found, using sample data");
     return getSampleAnalysis(corpus);
   }
 
