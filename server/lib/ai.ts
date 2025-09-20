@@ -1,4 +1,3 @@
-
 import { AnalysisSchema } from "@shared/analysisSchema";
 import { jsonSafeParse } from "./jsonSafeParse.js";
 
@@ -79,14 +78,17 @@ Generate realistic data based on the document content. Include meaningful KPIs, 
 
     const data = await response.json();
     const rawJson = data.choices[0]?.message?.content || "{}";
-    
+
     // Parse and validate the JSON response
     const aiJson = jsonSafeParse(rawJson);
     
-    // Generate markdown summary
-    const aiMarkdown = generateMarkdownSummary(aiJson);
+    // Validate the parsed JSON against the schema
+    const validatedJson = AnalysisSchema.parse(aiJson);
 
-    return { aiJson, aiMarkdown };
+    // Generate markdown summary
+    const aiMarkdown = generateMarkdownSummary(validatedJson);
+
+    return { aiJson: validatedJson, aiMarkdown };
   } catch (error) {
     console.error("OpenAI analysis failed:", error);
     return getSampleAnalysis(corpus);
@@ -97,7 +99,7 @@ function generateMarkdownSummary(analysisData: any): string {
   const score = analysisData.score || 0;
   const kpis = analysisData.kpis || [];
   const insights = analysisData.insights || [];
-  
+
   return `# خلاصه اجرایی
 
 ## امتیاز عملکرد کلی: ${score}/100
@@ -186,6 +188,6 @@ function getSampleAnalysis(corpus: string) {
   };
 
   const aiMarkdown = generateMarkdownSummary(aiJson);
-  
+
   return { aiJson, aiMarkdown };
 }

@@ -1,4 +1,5 @@
 import { JSDOM } from "jsdom";
+import cheerio from 'cheerio';
 // analyzeImage function will be implemented separately
 
 // Lazy import pdf-parse to avoid startup issues
@@ -17,148 +18,129 @@ async function getPdfParse() {
 }
 
 export async function extractText(file: Express.Multer.File): Promise<string> {
-  switch (file.mimetype) {
-    case "text/html":
-      return extractFromHTML(file.buffer);
-    case "application/pdf":
-      return extractFromPDF(file.buffer);
-    case "image/jpeg":
-    case "image/jpg":
-    case "image/png":
-      return extractFromImage(file.buffer);
-    default:
-      throw new Error(`Unsupported file type: ${file.mimetype}`);
+  if (!file.buffer) {
+    throw new Error("No file buffer available");
+  }
+
+  const mimeType = file.mimetype;
+  const fileName = file.originalname.toLowerCase();
+
+  try {
+    if (mimeType === "text/html" || fileName.endsWith(".html")) {
+      const html = file.buffer.toString("utf-8");
+
+      // Remove script and style tags completely
+      const cleanHtml = html
+        .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+        .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '');
+
+      // Parse HTML and extract text
+      const $ = cheerio.load(cleanHtml);
+
+      // Remove unwanted elements
+      $('script, style, nav, header, footer, aside, .sidebar, .menu, .navigation').remove();
+
+      // Extract structured data
+      const extractedData = {
+        title: $('title').text() || $('h1').first().text(),
+        tables: extractTablesData($),
+        lists: extractListsData($),
+        paragraphs: extractParagraphsData($),
+        numbers: extractNumbersData($),
+        dates: extractDatesData($)
+      };
+
+      // Get text content and clean it up
+      let text = $.text();
+
+      // Clean up whitespace and normalize
+      text = text
+        .replace(/\s+/g, ' ')
+        .replace(/\n\s*\n/g, '\n')
+        .trim();
+
+      // Enhance with structured data
+      let enhancedText = text;
+
+      if (extractedData.title) {
+        enhancedText = `عنوان: ${extractedData.title}\n\n${enhancedText}`;
+      }
+
+      if (extractedData.tables.length > 0) {
+        enhancedText += '\n\nداده‌های جدول:\n' + extractedData.tables.join('\n');
+      }
+
+      if (extractedData.numbers.length > 0) {
+        enhancedText += '\n\nاعداد مهم: ' + extractedData.numbers.join(', ');
+      }
+
+      if (extractedData.dates.length > 0) {
+        enhancedText += '\n\nتاریخ‌ها: ' + extractedData.dates.join(', ');
+      }
+
+      if (!enhancedText || enhancedText.length < 10) {
+        return "محتوای متنی قابل تحلیل در فایل HTML یافت نشد.";
+      }
+
+      return enhancedText;
+    }
+
+    // Handle other file types here if needed
+    throw new Error(`نوع فایل پشتیبانی نمی‌شود: ${mimeType}`);
+
+  } catch (error) {
+    console.error(`استخراج متن برای ${file.originalname} ناموفق بود:`, error);
+    return `استخراج متن برای فایل ناموفق بود: ${file.originalname}`;
   }
 }
 
-function extractFromHTML(buffer: Buffer): string {
-  try {
-    // Try to detect encoding from BOM or meta tags
-    let html = '';
-    
-    // Check for BOM (Byte Order Mark)
-    if (buffer.length >= 3) {
-      const bom = buffer.subarray(0, 3);
-      if (bom[0] === 0xEF && bom[1] === 0xBB && bom[2] === 0xBF) {
-        // UTF-8 BOM detected
-        html = buffer.subarray(3).toString("utf-8");
-      } else if (buffer.length >= 2) {
-        const bom2 = buffer.subarray(0, 2);
-        if ((bom2[0] === 0xFF && bom2[1] === 0xFE) || (bom2[0] === 0xFE && bom2[1] === 0xFF)) {
-          // UTF-16 BOM detected
-          html = buffer.toString("utf16le");
-        } else {
-          // No BOM, try UTF-8
-          html = buffer.toString("utf-8");
-        }
-      } else {
-        html = buffer.toString("utf-8");
+function extractTablesData($: any): string[] {
+  const tables: string[] = [];
+  $('table').each((i: number, table: any) => {
+    const rows: string[] = [];
+    $(table).find('tr').each((j: number, row: any) => {
+      const cells = $(row).find('td, th').map((k: number, cell: any) => $(cell).text().trim()).get();
+      if (cells.length > 0) {
+        rows.push(cells.join(' | '));
       }
-    } else {
-      html = buffer.toString("utf-8");
-    }
-
-    // If UTF-8 decoding produced invalid characters, try other encodings
-    if (html.includes('\uFFFD')) {
-      console.log("Invalid UTF-8 characters detected, trying alternative encodings");
-      try {
-        html = buffer.toString("latin1");
-      } catch (error) {
-        console.warn("Latin1 encoding failed, falling back to UTF-8");
-        html = buffer.toString("utf-8");
-      }
-    }
-
-    // Clean up the HTML before parsing
-    html = html.replace(/^\uFEFF/, ''); // Remove BOM if present
-    
-    // Parse with JSDOM
-    const dom = new JSDOM(html, {
-      contentType: "text/html",
-      includeNodeLocations: false,
-      storageQuota: 10000000
     });
-    const document = dom.window.document;
-    
-    // Remove script and style elements
-    const scripts = document.querySelectorAll("script, style, noscript");
-    scripts.forEach(el => el.remove());
-    
-    // Extract title
-    const title = document.querySelector("title")?.textContent?.trim() || "";
-    
-    // Extract meta description as additional context
-    const metaDesc = document.querySelector('meta[name="description"]')?.getAttribute('content')?.trim() || "";
-    
-    // Extract body text with better handling
-    let bodyText = "";
-    if (document.body) {
-      bodyText = document.body.textContent || "";
-    } else if (document.documentElement) {
-      bodyText = document.documentElement.textContent || "";
+    if (rows.length > 0) {
+      tables.push(rows.join('\n'));
     }
-    
-    // Clean up extracted text
-    bodyText = bodyText
-      .replace(/\s+/g, ' ') // Replace multiple whitespace with single space
-      .replace(/\n\s*\n/g, '\n') // Remove empty lines
-      .trim();
-    
-    // Combine extracted parts
-    let result = '';
-    if (title) result += `Title: ${title}\n\n`;
-    if (metaDesc) result += `Description: ${metaDesc}\n\n`;
-    if (bodyText) result += `Content: ${bodyText}`;
-    
-    return result.trim() || "No readable content found in HTML file";
-    
-  } catch (error) {
-    console.error("HTML extraction error:", error);
-    
-    // Fallback: try simple text extraction without JSDOM
-    try {
-      let html = buffer.toString("utf-8");
-      
-      // Remove HTML tags with regex as fallback
-      html = html.replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
-                 .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
-                 .replace(/<[^>]+>/g, ' ')
-                 .replace(/&nbsp;/g, ' ')
-                 .replace(/&amp;/g, '&')
-                 .replace(/&lt;/g, '<')
-                 .replace(/&gt;/g, '>')
-                 .replace(/&quot;/g, '"')
-                 .replace(/&#39;/g, "'")
-                 .replace(/\s+/g, ' ')
-                 .trim();
-                 
-      return html || "Failed to extract content from HTML file";
-      
-    } catch (fallbackError) {
-      console.error("HTML fallback extraction failed:", fallbackError);
-      return `HTML file processing failed. Error: ${error instanceof Error ? error.message : 'Unknown error'}`;
-    }
-  }
+  });
+  return tables;
 }
 
-async function extractFromPDF(buffer: Buffer): Promise<string> {
-  try {
-    const pdfParser = await getPdfParse();
-    if (!pdfParser) {
-      console.warn("PDF parser not available, falling back to OCR");
-      return extractFromImage(buffer);
+function extractListsData($: any): string[] {
+  const lists: string[] = [];
+  $('ul, ol').each((i: number, list: any) => {
+    const items = $(list).find('li').map((j: number, item: any) => $(item).text().trim()).get();
+    if (items.length > 0) {
+      lists.push(items.join(', '));
     }
-    const data = await pdfParser(buffer);
-    return data.text;
-  } catch (error) {
-    // If PDF parsing fails, fall back to OCR via AI vision
-    console.warn("PDF parsing failed, falling back to OCR:", error);
-    return extractFromImage(buffer);
-  }
+  });
+  return lists;
 }
 
-async function extractFromImage(buffer: Buffer): Promise<string> {
-  const base64 = buffer.toString("base64");
-  // For now, return a placeholder until AI vision is implemented
-  return "Image content extracted (OCR functionality to be implemented)";
+function extractParagraphsData($: any): string[] {
+  const paragraphs: string[] = [];
+  $('p').each((i: number, p: any) => {
+    const text = $(p).text().trim();
+    if (text && text.length > 20) {
+      paragraphs.push(text);
+    }
+  });
+  return paragraphs;
+}
+
+function extractNumbersData($: any): string[] {
+  const text = $.text();
+  const numbers = text.match(/\d+(?:\.\d+)?(?:%|درصد|تومان|ریال|دلار|\$|€|£)?/g) || [];
+  return [...new Set(numbers)]; // Remove duplicates
+}
+
+function extractDatesData($: any): string[] {
+  const text = $.text();
+  const dates = text.match(/\d{4}[-\/]\d{1,2}[-\/]\d{1,2}|\d{1,2}[-\/]\d{1,2}[-\/]\d{4}|\d{1,2}\s+(ژانویه|فوریه|مارس|آوریل|مه|ژوئن|ژوئیه|اوت|سپتامبر|اکتبر|نوامبر|دسامبر|\u06A9\u0647|\u0622\u0628\u0627\u0646|\u0622\u0630\u0631|\u062F\u06CC|\u0628\u0647\u0645\u0646|\u0627\u0633\u0641\u0646\u062F|\u0641\u0631\u0648\u0631\u062F\u06CC\u0646|\u0627\u0631\u062F\u06CC\u0628\u0647\u0634\u062A|\u062E\u0631\u062F\u0627\u062F|\u062A\u06CC\u0631|\u0645\u0631\u062F\u0627\u062F|\u0634\u0647\u0631\u06CC\u0648\u0631|\u0645\u0647\u0631)\s+\d{4}/g) || [];
+  return [...new Set(dates)]; // Remove duplicates
 }
