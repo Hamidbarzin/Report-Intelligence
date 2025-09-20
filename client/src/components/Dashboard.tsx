@@ -22,11 +22,11 @@ export function Dashboard() {
   const filteredReports = reports.filter((report: Report) => {
     const matchesSearch = report.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          (report.ai_markdown && report.ai_markdown.toLowerCase().includes(searchQuery.toLowerCase()));
-    
-    const matchesFilter = filterBy === "all" || 
+
+    const matchesFilter = filterBy === "all" ||
                          (filterBy === "high-score" && report.score && parseFloat(report.score) >= 80) ||
                          (filterBy === "recent" && new Date(report.upload_date) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000));
-    
+
     return matchesSearch && matchesFilter;
   });
 
@@ -43,9 +43,9 @@ export function Dashboard() {
 
   const stats = {
     totalReports: reports.length,
-    avgScore: reports.length > 0 ? 
+    avgScore: reports.length > 0 ?
       (reports.reduce((sum: number, r: Report) => sum + parseFloat(r.score || "0"), 0) / reports.length).toFixed(1) : "0",
-    thisMonth: reports.filter((r: Report) => 
+    thisMonth: reports.filter((r: Report) =>
       new Date(r.upload_date).getMonth() === new Date().getMonth()
     ).length,
     aiStatus: "Active"
@@ -60,7 +60,7 @@ export function Dashboard() {
             <p className="text-muted-foreground mt-2">AI-analyzed intelligence reports from our research team</p>
           </div>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           {[...Array(4)].map((_, i) => (
             <Card key={i} className="animate-pulse">
@@ -70,7 +70,7 @@ export function Dashboard() {
             </Card>
           ))}
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[...Array(6)].map((_, i) => (
             <Card key={i} className="animate-pulse">
@@ -97,10 +97,10 @@ export function Dashboard() {
       {/* Dashboard Header */}
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Published Reports</h1>
+          <h1 className="text-3xl font-bold tracking-tight">داشبورد گزارش‌ها</h1>
           <p className="text-muted-foreground mt-2">AI-analyzed intelligence reports from our research team</p>
         </div>
-        
+
         {/* Filters & Search */}
         <div className="flex flex-wrap items-center gap-4">
           <div className="relative">
@@ -153,7 +153,7 @@ export function Dashboard() {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
@@ -169,7 +169,7 @@ export function Dashboard() {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
@@ -185,7 +185,7 @@ export function Dashboard() {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
@@ -213,8 +213,8 @@ export function Dashboard() {
       ) : (
         <div className="text-center py-12">
           <p className="text-muted-foreground">
-            {searchQuery || filterBy !== "all" 
-              ? "No reports match your search criteria." 
+            {searchQuery || filterBy !== "all"
+              ? "No reports match your search criteria."
               : "No published reports available."}
           </p>
         </div>

@@ -243,7 +243,7 @@ export default function ReportPage() {
             <FileText className="h-5 w-5" />
             📋 محتوای گزارش
           </h3>
-          
+
           {(report.extracted_text || report.content) ? (
             <div className="space-y-4">
               {/* نمایش خام محتوا */}
@@ -253,7 +253,7 @@ export default function ReportPage() {
                   {(report.extracted_text || report.content).length > 2000 && "..."}
                 </pre>
               </div>
-              
+
               {/* نمایش ایمن متن (بدون HTML برای جلوگیری از XSS) */}
               <div className="border-t pt-4">
                 <h4 className="font-medium mb-2">محتوای استخراج شده:</h4>
@@ -273,7 +273,7 @@ export default function ReportPage() {
                   </div>
                 </div>
               </div>
-              
+
               {/* اطلاعات فایل */}
               <div className="bg-blue-50 p-3 rounded-lg text-sm">
                 <p><strong>حجم محتوا:</strong> {(report.extracted_text || report.content).length.toLocaleString()} کاراکتر</p>
@@ -293,7 +293,7 @@ export default function ReportPage() {
                 <p>🔤 مشکل Encoding (باید UTF-8 باشد)</p>
                 <p>📄 فایل خراب یا ناقص</p>
                 <p>💾 مشکل در ذخیره‌سازی دیتابیس</p>
-                
+
                 <div className="mt-4 p-3 bg-blue-50 rounded">
                   <p><strong>🛠️ راه‌حل‌های پیشنهادی:</strong></p>
                   <p>• فایل HTML را مجدداً آپلود کنید</p>

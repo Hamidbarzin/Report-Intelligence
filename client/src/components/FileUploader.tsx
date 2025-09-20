@@ -44,7 +44,7 @@ export function FileUploader({ onUploadComplete }: FileUploaderProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!title.trim()) {
       toast({
         title: "Error",
@@ -76,7 +76,7 @@ export function FileUploader({ onUploadComplete }: FileUploaderProps) {
       selectedFiles.forEach(file => fileList.items.add(file));
 
       const result = await uploadFiles(title, fileList.files);
-      
+
       clearInterval(progressInterval);
       setUploadProgress(100);
 
@@ -89,7 +89,7 @@ export function FileUploader({ onUploadComplete }: FileUploaderProps) {
       setSelectedFiles([]);
       setTitle("");
       setDescription("");
-      
+
       onUploadComplete?.(result.reportId);
     } catch (error) {
       toast({
@@ -114,8 +114,8 @@ export function FileUploader({ onUploadComplete }: FileUploaderProps) {
   return (
     <Card>
       <CardContent className="p-8">
-        <h2 className="text-xl font-semibold mb-6">Upload New Report</h2>
-        
+        <h2 className="text-xl font-semibold mb-6">آپلود گزارش</h2>
+
         {/* File Upload Area */}
         <div 
           className="border-2 border-dashed border-border rounded-lg p-12 text-center hover:border-primary/50 transition-colors mb-6"
@@ -128,13 +128,13 @@ export function FileUploader({ onUploadComplete }: FileUploaderProps) {
               <Upload className="w-8 h-8 text-primary" />
             </div>
             <div>
-              <h3 className="text-lg font-medium">Drop files here or click to upload</h3>
+              <h3 className="text-lg font-medium">فایل‌ها را اینجا بکشید یا کلیک کنید</h3>
               <p className="text-muted-foreground">فقط فایل‌های HTML پذیرفته می‌شوند</p>
               <p className="text-sm text-muted-foreground">Maximum file size: 20MB per file</p>
             </div>
             <Button asChild>
               <label>
-                Select Files
+                انتخاب فایل‌ها
                 <input
                   type="file"
                   multiple
@@ -151,7 +151,7 @@ export function FileUploader({ onUploadComplete }: FileUploaderProps) {
         {/* Selected Files */}
         {selectedFiles.length > 0 && (
           <div className="space-y-4 mb-6">
-            <h3 className="font-medium">Selected Files</h3>
+            <h3 className="font-medium">فایل‌های انتخاب شده</h3>
             <div className="space-y-3">
               {selectedFiles.map((file, index) => (
                 <div 
@@ -186,7 +186,7 @@ export function FileUploader({ onUploadComplete }: FileUploaderProps) {
         {/* Upload Progress */}
         {isUploading && (
           <div className="space-y-4 mb-6" data-testid="upload-progress">
-            <h3 className="font-medium">Uploading Files</h3>
+            <h3 className="font-medium">در حال آپلود فایل‌ها</h3>
             <Progress value={uploadProgress} className="w-full" />
             <p className="text-sm text-muted-foreground">{uploadProgress}% complete</p>
           </div>
@@ -195,30 +195,30 @@ export function FileUploader({ onUploadComplete }: FileUploaderProps) {
         {/* Report Form */}
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <Label htmlFor="title">Report Title</Label>
+            <Label htmlFor="title">عنوان گزارش</Label>
             <Input
               id="title"
               type="text"
-              placeholder="Enter report title..."
+              placeholder="عنوان گزارش"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               required
               data-testid="input-title"
             />
           </div>
-          
+
           <div>
-            <Label htmlFor="description">Description (Optional)</Label>
+            <Label htmlFor="description">توضیحات (اختیاری)</Label>
             <Textarea
               id="description"
               rows={3}
-              placeholder="Brief description of the report..."
+              placeholder="توضیح مختصر گزارش..."
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               data-testid="textarea-description"
             />
           </div>
-          
+
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <Checkbox
@@ -227,19 +227,19 @@ export function FileUploader({ onUploadComplete }: FileUploaderProps) {
                 onCheckedChange={(checked) => setAutoAnalyze(checked === true)}
                 data-testid="checkbox-auto-analyze"
               />
-              <Label htmlFor="autoAnalyze">Auto-analyze after upload</Label>
+              <Label htmlFor="autoAnalyze">تحلیل خودکار پس از آپلود</Label>
             </div>
-            
+
             <div className="flex items-center space-x-3">
               <Button type="button" variant="secondary">
-                Save Draft
+                ذخیره پیش‌نویس
               </Button>
               <Button 
                 type="submit" 
                 disabled={isUploading}
                 data-testid="button-upload"
               >
-                {isUploading ? "Uploading..." : "Upload & Process"}
+                {isUploading ? "در حال آپلود..." : "آپلود و پردازش"}
               </Button>
             </div>
           </div>

@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -12,10 +11,10 @@ import { useToast } from "@/hooks/use-toast";
 
 // Try to import Recharts if available, otherwise graceful fallback
 let Recharts: any = null;
-try { 
-  Recharts = require("recharts"); 
-} catch (_) { 
-  Recharts = null; 
+try {
+  Recharts = require("recharts");
+} catch (_) {
+  Recharts = null;
 }
 
 // Helper to prepare recharts data
@@ -54,7 +53,7 @@ export default function AIAnalyzeTabs({ report, onUpdate }: AIAnalyzeTabsProps) 
   const runAnalyze = async () => {
     try {
       setLoading(true);
-      
+
       // Try real backend first
       try {
         const response = await fetch(`/api/analyze/${report.id}`, {
@@ -65,14 +64,14 @@ export default function AIAnalyzeTabs({ report, onUpdate }: AIAnalyzeTabsProps) 
           },
           credentials: "include"
         });
-        
+
         if (response.ok) {
           const result = await response.json();
-          const updated = { 
-            ...report, 
-            ai_json: result.ai_json, 
-            ai_markdown: result.ai_markdown, 
-            score: result.score?.toString() || "0" 
+          const updated = {
+            ...report,
+            ai_json: result.ai_json,
+            ai_markdown: result.ai_markdown,
+            score: result.score?.toString() || "0"
           };
           onUpdate?.(updated);
           toast({
@@ -86,19 +85,19 @@ export default function AIAnalyzeTabs({ report, onUpdate }: AIAnalyzeTabsProps) 
       }
 
       // Fallback to sample data
-      const updated = { 
-        ...report, 
-        ai_json: sampleAiJson, 
-        ai_markdown: sampleMarkdown, 
-        score: sampleAiJson.score?.toString() || "0" 
+      const updated = {
+        ...report,
+        ai_json: sampleAiJson,
+        ai_markdown: sampleMarkdown,
+        score: sampleAiJson.score?.toString() || "0"
       };
       onUpdate?.(updated);
-      
+
       toast({
         title: "🤖 تحلیل نمونه کامل شد",
         description: "از داده‌های نمونه برای نمایش استفاده شده است.",
       });
-      
+
     } catch (e: any) {
       toast({
         title: "Analysis Failed",
@@ -253,15 +252,15 @@ function KPIsView({ ai }: { ai: any }) {
 // Charts View
 function ChartsView({ ai }: { ai: any }) {
   if (!Recharts) return null;
-  
+
   const { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } = Recharts;
-  
+
   return (
     <div className="grid md:grid-cols-2 gap-4">
       {ai.charts?.map((c: any, idx: number) => {
         const series = toRecharts(c.series);
         const data = series[0]?.data ?? [];
-        
+
         if (c.type === 'line') {
           return (
             <Card key={idx}>
@@ -275,11 +274,11 @@ function ChartsView({ ai }: { ai: any }) {
                       <YAxis />
                       <Tooltip />
                       <Legend />
-                      <Line 
-                        type="monotone" 
-                        dataKey="y" 
+                      <Line
+                        type="monotone"
+                        dataKey="y"
                         name={series[0]?.name || 'Series'}
-                        stroke="#8884d8" 
+                        stroke="#8884d8"
                       />
                     </LineChart>
                   </ResponsiveContainer>
@@ -288,7 +287,7 @@ function ChartsView({ ai }: { ai: any }) {
             </Card>
           );
         }
-        
+
         if (c.type === 'bar') {
           return (
             <Card key={idx}>
@@ -302,10 +301,10 @@ function ChartsView({ ai }: { ai: any }) {
                       <YAxis />
                       <Tooltip />
                       <Legend />
-                      <Bar 
-                        dataKey="y" 
+                      <Bar
+                        dataKey="y"
                         name={series[0]?.name || 'Series'}
-                        fill="#8884d8" 
+                        fill="#8884d8"
                       />
                     </BarChart>
                   </ResponsiveContainer>
@@ -314,7 +313,7 @@ function ChartsView({ ai }: { ai: any }) {
             </Card>
           );
         }
-        
+
         return null;
       })}
     </div>
@@ -330,7 +329,7 @@ function PlanView({ plan }: { plan: any }) {
       </CardContent>
     </Card>
   );
-  
+
   return (
     <div className="space-y-6">
       <Card>
@@ -355,7 +354,7 @@ function PlanView({ plan }: { plan: any }) {
                     <Badge>Week {w.week}</Badge>
                     <span className="text-sm text-muted-foreground">Owner: {w.owner || "-"}</span>
                   </div>
-                  
+
                   <div className="space-y-2">
                     <div>
                       <span className="font-medium text-sm">Goals:</span>
@@ -363,7 +362,7 @@ function PlanView({ plan }: { plan: any }) {
                         {w.goals?.map((g: string, j: number) => <li key={j}>{g}</li>)}
                       </ul>
                     </div>
-                    
+
                     <div>
                       <span className="font-medium text-sm">Metrics:</span>
                       <div className="flex flex-wrap gap-1 mt-1">
@@ -395,7 +394,7 @@ function PlanView({ plan }: { plan: any }) {
             </div>
           </CardContent>
         </Card>
-        
+
         <Card>
           <CardContent className="p-6">
             <h3 className="font-semibold mb-4">Risks & Mitigations</h3>

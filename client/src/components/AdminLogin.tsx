@@ -20,14 +20,14 @@ export function AdminLogin() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/me"] });
       toast({
-        title: "Success",
-        description: "Logged in successfully",
+        title: "موفقیت",
+        description: "با موفقیت وارد شدید",
       });
       setLocation("/admin");
     },
     onError: (error: Error) => {
       toast({
-        title: "Login Failed",
+        title: "ورود ناموفق",
         description: error.message,
         variant: "destructive"
       });
@@ -38,8 +38,8 @@ export function AdminLogin() {
     e.preventDefault();
     if (!password.trim()) {
       toast({
-        title: "Error",
-        description: "Please enter a password",
+        title: "خطا",
+        description: "لطفا رمز عبور را وارد کنید",
         variant: "destructive"
       });
       return;
@@ -55,41 +55,41 @@ export function AdminLogin() {
             <div className="w-16 h-16 bg-primary rounded-lg flex items-center justify-center mx-auto mb-4">
               <ShieldCheck className="w-8 h-8 text-primary-foreground" />
             </div>
-            <h1 className="text-2xl font-bold">Admin Login</h1>
-            <p className="text-muted-foreground mt-2">Enter your admin credentials to continue</p>
+            <h1 className="text-2xl font-bold">ورود مدیر</h1>
+            <p className="text-muted-foreground mt-2">برای ادامه، اطلاعات مدیر خود را وارد کنید</p>
           </div>
-          
+
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">رمز عبور</Label>
               <Input
                 id="password"
                 type="password"
-                placeholder="Enter admin password"
+                placeholder="رمز عبور مدیر را وارد کنید"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 data-testid="input-password"
               />
             </div>
-            
+
             <Button 
               type="submit" 
               className="w-full"
               disabled={loginMutation.isPending}
               data-testid="button-login"
             >
-              {loginMutation.isPending ? "Signing In..." : "Sign In"}
+              {loginMutation.isPending ? "در حال ورود..." : "ورود"}
             </Button>
           </form>
-          
+
           <div className="mt-6 text-center">
             <Button 
               variant="ghost" 
               onClick={() => setLocation("/")}
               data-testid="button-back-dashboard"
             >
-              ← Back to Dashboard
+              ← بازگشت به داشبورد
             </Button>
           </div>
         </CardContent>
