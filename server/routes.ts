@@ -442,6 +442,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Public reports endpoint (only published reports)
+  app.get("/api/reports", async (req, res) => {
+    try {
+      const allReports = await storage.getAllReports();
+      const publishedReports = allReports.filter(report => report.is_published);
+
+      res.json(publishedReports);
+    } catch (error) {
+      console.error("Public reports fetch error:", error);
+      res.status(500).json({ message: "Failed to fetch reports" });
+    }
+  });
+
   // Admin-only report management endpoints
   app.get("/api/admin/reports", requireAdmin, async (req, res) => {
     try {
