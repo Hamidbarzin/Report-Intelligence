@@ -135,10 +135,11 @@ export function ReportView() {
             <CardContent className="p-8">
               <h2 className="text-xl font-semibold mb-6">Executive Summary</h2>
               <div 
-                className="prose prose-slate max-w-none dark:prose-invert"
+                className="prose prose-slate max-w-none dark:prose-invert whitespace-pre-wrap"
                 data-testid="content-summary"
-                dangerouslySetInnerHTML={{ __html: report.ai_markdown || "No summary available." }}
-              />
+              >
+                {report.ai_markdown || "No summary available."}
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
