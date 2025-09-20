@@ -1,0 +1,121 @@
+You are a senior full-stack engineer. Upgrade/build my app so it supports this end-to-end flow:
+
+UPLOAD → TEXT EXTRACTION → AI ANALYSIS → FINAL REPORT RENDER
+with a visible **Run Analysis (AI)** button in the UI.
+
+### WHAT TO BUILD
+1) Upload weekly/monthly reports as **HTML / PDF / Image (PNG/JPG)**.
+2) Extract text:
+   - HTML: parse <title> and body (sanitize)
+   - PDF: server-side text extraction (pdf-parse); fallback to AI OCR if scanned
+   - Image: OCR via AI vision if available
+   - Merge all text into one `corpus`
+3) **AI analysis (single click)**:
+   - Add a **primary button** in the Report View/Admin panel: **“Analyze with AI”**
+   - On click: call `/api/analyze` → returns:
+     - `ai_json` (STRICT schema below)
+     - `ai_markdown` (executive summary)
+4) Render the Final Report with FOUR sections (tabs):
+   - **Executive Summary** (render markdown)
+   - **KPIs + Trends + Progress Score (0–100)**
+   - **Growth/Progress Charts** (Recharts)
+   - **One-Month Plan** (weekly goals, milestones, risks/mitigations)
+5) Persistence:
+   - Source of truth: **Supabase** (Postgres + Storage)
+   - Public read-only viewing for published reports
+   - Admin-only: upload / analyze / publish / delete
+6) Fallback: If no LLM key is set, use the SAMPLE `ai_json` below so UI still works.
+
+### STACK / CONSTRAINTS
+- React 18 + Vite + Tailwind + Recharts
+- Serverless API (/api/*) in Node 18+ (also provide optional Express entry)
+- Supabase: table `reports`, bucket `reports_files`
+- Keep current UI/branding; **add only missing pieces**
+- Same-origin fetch; no client-side secrets
+
+### ENDPOINTS
+- `POST /api/upload` (admin): multipart → upload to Storage → row in `reports` with `status='uploaded'`
+- `POST /api/analyze` (admin):
+  Input: `{ reportId }`
+  Steps: fetch files → extract text → call LLM → return `{ ai_json, ai_markdown, score }` and save to DB (`status='analyzed'`)
+  Fallback: if no LLM key → return SAMPLE below
+- `POST /api/publish` (admin): set `is_published=true`, `status='published'`
+- `GET /api/list` (public): published reports (id, title, dates, score)
+- `GET /api/report/:id` (public): full published report with `ai_json`, `ai_markdown`, files[]
+
+### UI WIRING
+- In Report View (admin):
+  - Show a **primary button** “Analyze with AI”
+  - While running: loading state, then persist results and re-render tabs
+- Tabs/components:
+  - `SummaryTab`: render `ai_markdown`
+  - `KPIsTab`: cards for each KPI (value+unit, target, delta ▲/▼) + big **Score (0–100)**
+  - `ChartsBoard`: render `ai_json.charts` via Recharts (line/bar/pie)
+  - `PlanView`: show `focus_themes`, `weekly_plan` (weeks 1–4), `milestones`, `risks_mitigations`
+- Public dashboard: show published items; clicking opens the 4 tabs in read-only
+
+### STRICT JSON SCHEMA (LLM must output ONLY this JSON)
+{
+  "report_id":"string",
+  "timeframe":{"start":"YYYY-MM-DD","end":"YYYY-MM-DD"},
+  "kpis":[{"name":"string","value":number,"unit":"string","target":number,"delta":number}],
+  "trend_summary":"string",
+  "insights":[{"type":"win|risk|issue|opportunity","text":"string"}],
+  "score":0,
+  "charts":[{"title":"string","type":"line|bar|pie","series":[{"name":"string","points":[{"x":"YYYY-MM-DD","y":number}]}]}],
+  "next_month_plan":{
+    "focus_themes":["string"],
+    "weekly_plan":[
+      {"week":1,"goals":["string"],"metrics":["string"],"owner":"string?"},
+      {"week":2,"goals":["string"],"metrics":["string"],"owner":"string?"},
+      {"week":3,"goals":["string"],"metrics":["string"],"owner":"string?"},
+      {"week":4,"goals":["string"],"metrics":["string"],"owner":"string?"}
+    ],
+    "milestones":[{"title":"string","due":"YYYY-MM-DD"}],
+    "risks_mitigations":[{"risk":"string","mitigation":"string"}]
+  }
+}
+
+### SAMPLE ai_json (use when LLM key missing so UI renders)
+{
+  "report_id":"seed",
+  "timeframe":{"start":"2025-08-15","end":"2025-09-15"},
+  "kpis":[
+    {"name":"Orders","value":120,"unit":"","target":150,"delta":15},
+    {"name":"On-time %","value":92,"unit":"%","target":95,"delta":3},
+    {"name":"Revenue","value":42000,"unit":"CAD","target":50000,"delta":8000}
+  ],
+  "trend_summary":"Growth in orders and revenue; slight gap to targets.",
+  "insights":[
+    {"type":"win","text":"Same-day delivery uptake rose 18%"},
+    {"type":"risk","text":"Driver availability on weekends is tight"}
+  ],
+  "score":82,
+  "charts":[
+    {"title":"Orders per week","type":"line","series":[{"name":"Orders","points":[
+      {"x":"2025-08-18","y":22},{"x":"2025-08-25","y":27},{"x":"2025-09-01","y":31},{"x":"2025-09-08","y":40}
+    ]}]},
+    {"title":"Revenue","type":"bar","series":[{"name":"CAD","points":[
+      {"x":"2025-08-18","y":9000},{"x":"2025-08-25","y":10000},{"x":"2025-09-01","y":11000},{"x":"2025-09-08","y":12000}
+    ]}]}
+  ],
+  "next_month_plan":{
+    "focus_themes":["On-time rate","B2B partnerships","Cost per delivery"],
+    "weekly_plan":[
+      {"week":1,"goals":["Audit late routes","Pilot SMS ETA"],"metrics":["late%","ETA open%"],"owner":"Ops"},
+      {"week":2,"goals":["Sign 2 partners","Bundle pricing"],"metrics":["partners","ARPU"],"owner":"Sales"},
+      {"week":3,"goals":["Optimize dispatch"],"metrics":["cost/stop","utilization%"],"owner":"Ops"},
+      {"week":4,"goals":["Review targets","QBR deck"],"metrics":["score","target gap"],"owner":"Exec"}
+    ],
+    "milestones":[{"title":"2 B2B contracts","due":"2025-10-10"}],
+    "risks_mitigations":[{"risk":"Weekend capacity","mitigation":"Hire 2 PT drivers"}]
+  }
+}
+
+### ACCEPTANCE CRITERIA
+- Admin uploads files → clicks **Analyze with AI** → sees:
+  1) Executive Summary (markdown)
+  2) KPIs with deltas + **Score (0–100)**
+  3) Recharts graphs from `charts[]`
+  4) One-month plan (weeks 1–4 + milestones + risks)
+- Results are saved in Supabase and visible after reload; published reports are public read-only.
