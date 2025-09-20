@@ -1,5 +1,6 @@
 
 import React, { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -35,6 +36,21 @@ export default function AIAnalyzeTabs({ report, onUpdate }: AIAnalyzeTabsProps) 
   const ai = report?.ai_json || null;
   const md = report?.ai_markdown || "";
 
+  // Check if user is admin
+  const { data: userInfo } = useQuery({
+    queryKey: ["user-info"],
+    queryFn: async () => {
+      try {
+        const response = await fetch("/api/me");
+        if (!response.ok) return { role: "public" };
+        return response.json();
+      } catch {
+        return { role: "public" };
+      }
+    }
+  });
+  const isAdmin = userInfo?.role === "admin";
+
   const runAnalyze = async () => {
     try {
       setLoading(true);
@@ -47,6 +63,7 @@ export default function AIAnalyzeTabs({ report, onUpdate }: AIAnalyzeTabsProps) 
             "Content-Type": "application/json",
             "X-Requested-With": "XMLHttpRequest",
           },
+          credentials: "include"
         });
         
         if (response.ok) {
@@ -95,7 +112,7 @@ export default function AIAnalyzeTabs({ report, onUpdate }: AIAnalyzeTabsProps) 
 
   return (
     <div className="mt-4">
-      {!ai && (
+      {!ai && isAdmin && (
         <Button
           onClick={runAnalyze}
           disabled={loading}
@@ -109,6 +126,11 @@ export default function AIAnalyzeTabs({ report, onUpdate }: AIAnalyzeTabsProps) 
           )}
           {loading ? "در حال تحلیل..." : "🤖 تحلیل هوشمند"}
         </Button>
+      )}
+      {!ai && !isAdmin && (
+        <div className="text-muted-foreground text-center p-4">
+          <p>تحلیل هوشمند فقط برای ادمین‌ها در دسترس است.</p>
+        </div>
       )}
 
       {ai && (
@@ -124,10 +146,15 @@ export default function AIAnalyzeTabs({ report, onUpdate }: AIAnalyzeTabsProps) 
             <TabsContent value="summary" className="space-y-4">
               <Card>
                 <CardContent className="p-6">
-                  <div
-                    className="prose prose-slate max-w-none dark:prose-invert"
-                    dangerouslySetInnerHTML={{ __html: miniMD(md) }}
-                  />
+                  <div className="prose prose-slate max-w-none dark:prose-invert">
+                    <div className="whitespace-pre-wrap">
+                      {md.replace(/<[^>]+>/g, ' ')
+                         .replace(/\*\*(.*?)\*\*/g, '$1')
+                         .replace(/\*(.*?)\*/g, '$1')
+                         .replace(/`([^`]+)`/g, '$1')
+                         .trim()}
+                    </div>
+                  </div>
                 </CardContent>
               </Card>
             </TabsContent>

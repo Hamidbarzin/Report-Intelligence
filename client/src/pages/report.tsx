@@ -78,11 +78,23 @@ export default function ReportPage() {
     );
   }
 
-  const analysisData = report.ai_json ? jsonSafeParse(JSON.stringify(report.ai_json)) : null;
-  const hasAnalysis = analysisData && report.ai_markdown;
+  const analysisData = report.ai_json || null;
+  const hasAnalysis = analysisData && typeof analysisData === 'object';
 
   // Check if user is admin to show analyze button
-  const isAdmin = document.cookie.includes('ri_admin') || document.cookie.includes('admin_token');
+  const { data: userInfo } = useQuery({
+    queryKey: ["user-info"],
+    queryFn: async () => {
+      try {
+        const response = await fetch("/api/me");
+        if (!response.ok) return { role: "public" };
+        return response.json();
+      } catch {
+        return { role: "public" };
+      }
+    }
+  });
+  const isAdmin = userInfo?.role === "admin";
 
   const getFileIcon = (type: string) => {
     switch (type) {
@@ -242,20 +254,25 @@ export default function ReportPage() {
                 </pre>
               </div>
               
-              {/* نمایش پردازش شده HTML */}
-              {(report.extracted_text || report.content).includes('<') && (
-                <div className="border-t pt-4">
-                  <h4 className="font-medium mb-2">نمایش پردازش شده:</h4>
-                  <div 
-                    className="prose prose-slate max-w-none dark:prose-invert bg-white p-4 rounded border"
-                    dangerouslySetInnerHTML={{ 
-                      __html: (report.extracted_text || report.content)
-                        .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-                        .replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '')
-                    }}
-                  />
+              {/* نمایش ایمن متن (بدون HTML برای جلوگیری از XSS) */}
+              <div className="border-t pt-4">
+                <h4 className="font-medium mb-2">محتوای استخراج شده:</h4>
+                <div className="bg-white p-4 rounded border max-h-64 overflow-y-auto">
+                  <div className="whitespace-pre-wrap text-sm leading-6">
+                    {(report.extracted_text || report.content)
+                      .replace(/<[^>]+>/g, ' ') // حذف تمام تگ‌های HTML
+                      .replace(/&nbsp;/g, ' ')
+                      .replace(/&amp;/g, '&')
+                      .replace(/&lt;/g, '<')
+                      .replace(/&gt;/g, '>')
+                      .replace(/&quot;/g, '"')
+                      .replace(/&#39;/g, "'")
+                      .replace(/\s+/g, ' ')
+                      .trim()
+                    }
+                  </div>
                 </div>
-              )}
+              </div>
               
               {/* اطلاعات فایل */}
               <div className="bg-blue-50 p-3 rounded-lg text-sm">

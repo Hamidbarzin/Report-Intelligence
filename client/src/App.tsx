@@ -13,6 +13,7 @@ import { Link, useLocation } from "wouter";
 import DashboardPage from "@/pages/dashboard";
 import ReportPage from "@/pages/report";
 import AdminPage from "@/pages/admin";
+import AnalysisPage from "@/pages/Analysis";
 import NotFound from "@/pages/not-found";
 
 function Header() {
@@ -38,6 +39,14 @@ function Header() {
                   className={location === "/" ? "text-primary" : "text-muted-foreground hover:text-primary"}
                 >
                   Dashboard
+                </Button>
+              </Link>
+              <Link href="/analysis">
+                <Button 
+                  variant="ghost" 
+                  className={location === "/analysis" ? "text-primary" : "text-muted-foreground hover:text-primary"}
+                >
+                  آرشیو تحلیل‌ها
                 </Button>
               </Link>
             </nav>
@@ -106,6 +115,7 @@ function Router() {
       <Route path="/" component={DashboardPage} />
       <Route path="/report/:id" component={ReportPage} />
       <Route path="/admin" component={AdminPage} />
+      <Route path="/analysis" component={AnalysisPage} />
       <Route component={NotFound} />
     </Switch>
   );
