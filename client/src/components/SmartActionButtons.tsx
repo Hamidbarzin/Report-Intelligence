@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -236,11 +235,11 @@ export default function SmartActionButtons({ report, onAnalyze, onUpdate }: Smar
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Share2 className="h-5 w-5 text-purple-500" />
-            صادرات و اشتراک
+            📤 صادرات و اشتراک
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex gap-3">
+          <div className="flex gap-3 flex-wrap">
             <Button 
               onClick={handleExportPDF}
               disabled={loading === "export"}
@@ -252,7 +251,7 @@ export default function SmartActionButtons({ report, onAnalyze, onUpdate }: Smar
               ) : (
                 <Download className="h-4 w-4" />
               )}
-              PDF صادرات
+              📄 گزارش PDF
             </Button>
 
             <Button 
@@ -261,15 +260,18 @@ export default function SmartActionButtons({ report, onAnalyze, onUpdate }: Smar
               onClick={() => {
                 navigator.clipboard.writeText(window.location.href);
                 toast({
-                  title: "🔗 لینک کپی شد",
-                  description: "لینک گزارش در کلیپ‌بورد قرار گرفت"
+                  title: "🔗 لینک گزارش کپی شد",
+                  description: "می‌توانید آن را با تیم خود به اشتراک بگذارید"
                 });
               }}
             >
               <Share2 className="h-4 w-4" />
-              اشتراک لینک
+              🔗 اشتراک لینک
             </Button>
           </div>
+          <p className="text-xs text-gray-500 mt-2">
+            📋 گزارش شامل: خلاصه اجرایی، شاخص‌های کلیدی، نمودارها و برنامه عملیاتی
+          </p>
         </CardContent>
       </Card>
     </div>

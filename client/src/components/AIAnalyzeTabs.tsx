@@ -59,8 +59,8 @@ export default function AIAnalyzeTabs({ report, onUpdate }: AIAnalyzeTabsProps) 
           };
           onUpdate?.(updated);
           toast({
-            title: "Analysis Complete",
-            description: "Report has been analyzed successfully.",
+            title: "✅ تحلیل هوشمند کامل شد",
+            description: "گزارش با موفقیت تحلیل شد و نتایج آماده است.",
           });
           return;
         }
@@ -78,8 +78,8 @@ export default function AIAnalyzeTabs({ report, onUpdate }: AIAnalyzeTabsProps) 
       onUpdate?.(updated);
       
       toast({
-        title: "Analysis Complete (Demo)",
-        description: "Using sample analysis data for demonstration.",
+        title: "🤖 تحلیل نمونه کامل شد",
+        description: "از داده‌های نمونه برای نمایش استفاده شده است.",
       });
       
     } catch (e: any) {
@@ -107,7 +107,7 @@ export default function AIAnalyzeTabs({ report, onUpdate }: AIAnalyzeTabsProps) 
           ) : (
             <Brain className="h-4 w-4" />
           )}
-          {loading ? "Analyzing..." : "Run AI Analysis"}
+          {loading ? "در حال تحلیل..." : "🤖 تحلیل هوشمند"}
         </Button>
       )}
 
@@ -115,10 +115,10 @@ export default function AIAnalyzeTabs({ report, onUpdate }: AIAnalyzeTabsProps) 
         <div className="mt-4">
           <Tabs defaultValue="summary">
             <TabsList className="grid w-full grid-cols-4">
-              <TabsTrigger value="summary">Executive Summary</TabsTrigger>
-              <TabsTrigger value="kpis">KPIs & Score</TabsTrigger>
-              <TabsTrigger value="charts">Charts</TabsTrigger>
-              <TabsTrigger value="plan">Action Plan</TabsTrigger>
+              <TabsTrigger value="summary">📋 خلاصه اجرایی</TabsTrigger>
+              <TabsTrigger value="kpis">📊 شاخص‌های کلیدی</TabsTrigger>
+              <TabsTrigger value="charts">📈 نمودارها</TabsTrigger>
+              <TabsTrigger value="plan">📅 برنامه ماهانه</TabsTrigger>
             </TabsList>
 
             <TabsContent value="summary" className="space-y-4">

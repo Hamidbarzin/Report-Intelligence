@@ -12,10 +12,10 @@ export default function FloatingActionButton({ onAction }: FloatingActionButtonP
   const [isOpen, setIsOpen] = useState(false);
 
   const actions = [
-    { id: "analyze", icon: Brain, label: "تحلیل", color: "bg-blue-500" },
-    { id: "charts", icon: BarChart3, label: "نمودار", color: "bg-green-500" },
-    { id: "goals", icon: Target, label: "اهداف", color: "bg-purple-500" },
-    { id: "export", icon: Download, label: "صادرات", color: "bg-orange-500" },
+    { id: "analyze", icon: Brain, label: "🤖 تحلیل هوشمند", color: "bg-blue-500" },
+    { id: "charts", icon: BarChart3, label: "📈 تولید نمودار", color: "bg-green-500" },
+    { id: "goals", icon: Target, label: "🎯 برنامه ماهانه", color: "bg-purple-500" },
+    { id: "export", icon: Download, label: "📤 صادرات PDF", color: "bg-orange-500" },
   ];
 
   return (
