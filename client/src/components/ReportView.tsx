@@ -96,7 +96,7 @@ export function ReportView() {
           
           <div className="flex items-center space-x-6 text-sm text-muted-foreground">
             <span data-testid="text-publish-date">
-              Published {formatDate(report.upload_date)}
+              Published {formatDate(report.upload_date.toString())}
             </span>
             <span data-testid="text-file-count">
               {report.files?.length || 0} files analyzed
@@ -180,7 +180,7 @@ export function ReportView() {
         {/* Charts Tab */}
         <TabsContent value="charts" className="space-y-8">
           {report.ai_json?.charts ? (
-            <ChartsBoard charts={report.ai_json.charts} />
+            <ChartsBoard data={report.ai_json} />
           ) : (
             <div className="text-center py-12">
               <p className="text-muted-foreground">No charts available for this report.</p>

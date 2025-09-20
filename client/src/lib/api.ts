@@ -1,4 +1,5 @@
 import { queryClient } from "./queryClient";
+import type { Report } from "@shared/schema";
 
 export interface ApiError {
   message: string;
@@ -73,7 +74,7 @@ export async function getPublishedReports() {
   return apiCall("/api/list");
 }
 
-export async function getReport(id: string) {
+export async function getReport(id: string): Promise<Report> {
   return apiCall(`/api/report/${id}`);
 }
 
