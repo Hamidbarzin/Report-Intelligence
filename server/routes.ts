@@ -10,7 +10,10 @@ import { extractText } from "./lib/extractors";
 import { analyzeDocument } from "./lib/ai";
 
 // Define JWT_SECRET, assuming it's available in the environment or imported
-const JWT_SECRET = process.env.JWT_SECRET || 'default-secret-key'; // Replace with your actual secret key or ensure it's set
+const JWT_SECRET = process.env.JWT_SECRET;
+if (!JWT_SECRET) {
+  throw new Error("JWT_SECRET environment variable is required for secure authentication");
+}
 
 const upload = multer({
   storage: multer.memoryStorage(),

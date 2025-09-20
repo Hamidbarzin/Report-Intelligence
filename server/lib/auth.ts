@@ -2,7 +2,10 @@ import jwt from "jsonwebtoken";
 import type { Request, Response, NextFunction } from "express";
 import type { AdminUser, PublicUser } from "@shared/schema";
 
-const JWT_SECRET = process.env.JWT_SECRET || process.env.SESSION_SECRET || "fallback-secret";
+const JWT_SECRET = process.env.JWT_SECRET || process.env.SESSION_SECRET;
+if (!JWT_SECRET) {
+  throw new Error("JWT_SECRET or SESSION_SECRET environment variable is required for secure authentication");
+}
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || "admin123";
 
 export interface AuthenticatedRequest extends Request {
