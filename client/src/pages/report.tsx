@@ -13,15 +13,17 @@ import ChartsBoard from "@/components/ChartsBoard";
 import SummaryTab from "@/components/SummaryTab";
 import KPIsTab from "@/components/KPIsTab";
 import PlanView from "@/components/PlanView";
+import AIAnalyzeTabs from "@/components/AIAnalyzeTabs";
 import { jsonSafeParse } from "@/lib/jsonSafeParse";
 
 export default function ReportPage() {
   const { id } = useParams<{ id: string }>();
   const [activeTab, setActiveTab] = useState("summary");
+  const [currentReport, setCurrentReport] = useState<any>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: report, isLoading, error } = useQuery({
+  const { data: fetchedReport, isLoading, error } = useQuery({
     queryKey: ["report", id],
     queryFn: async () => {
       const response = await fetch(`/api/report/${id}`);
@@ -30,38 +32,20 @@ export default function ReportPage() {
       }
       return response.json();
     },
-    enabled: !!id
+    enabled: !!id,
+    onSuccess: (data) => {
+      if (!currentReport) {
+        setCurrentReport(data);
+      }
+    }
   });
 
-  const analyzeMutation = useMutation({
-    mutationFn: async () => {
-      const response = await fetch(`/api/analyze/${id}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "X-Requested-With": "XMLHttpRequest",
-        },
-      });
-      if (!response.ok) {
-        throw new Error("Failed to analyze report");
-      }
-      return response.json();
-    },
-    onSuccess: () => {
-      toast({
-        title: "Analysis Complete",
-        description: "Report has been analyzed successfully.",
-      });
-      queryClient.invalidateQueries({ queryKey: ["report", id] });
-    },
-    onError: (error: Error) => {
-      toast({
-        title: "Analysis Failed",
-        description: error.message,
-        variant: "destructive",
-      });
-    },
-  });
+  const report = currentReport || fetchedReport;
+
+  const handleReportUpdate = (updatedReport: any) => {
+    setCurrentReport(updatedReport);
+    queryClient.setQueryData(["report", id], updatedReport);
+  };
 
   if (isLoading) {
     return (
@@ -143,21 +127,6 @@ export default function ReportPage() {
             <Badge variant="secondary">
               {report.status === "published" ? "Published" : "Draft"}
             </Badge>
-            {isAdmin && (
-              <Button
-                onClick={() => analyzeMutation.mutate()}
-                disabled={analyzeMutation.isPending}
-                className="flex items-center gap-2"
-                variant={hasAnalysis ? "outline" : "default"}
-              >
-                {analyzeMutation.isPending ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Brain className="h-4 w-4" />
-                )}
-                {hasAnalysis ? "Re-analyze with AI" : "Analyze with AI"}
-              </Button>
-            )}
           </div>
         </div>
         
@@ -173,98 +142,38 @@ export default function ReportPage() {
         </div>
       </div>
 
-      {hasAnalysis ? (
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-5">
-            <TabsTrigger value="summary">Summary</TabsTrigger>
-            <TabsTrigger value="kpis">KPIs</TabsTrigger>
-            <TabsTrigger value="charts">Charts</TabsTrigger>
-            <TabsTrigger value="plan">Action Plan</TabsTrigger>
-            <TabsTrigger value="files">Source Files</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="summary" className="space-y-6">
-            <SummaryTab markdown={report.ai_markdown} />
-          </TabsContent>
-
-          <TabsContent value="kpis" className="space-y-6">
-            <KPIsTab data={analysisData} />
-          </TabsContent>
-
-          <TabsContent value="charts" className="space-y-8">
-            <ChartsBoard data={analysisData} />
-          </TabsContent>
-
-          <TabsContent value="plan" className="space-y-8">
-            <PlanView data={analysisData?.next_month_plan} />
-          </TabsContent>
-
-          <TabsContent value="files" className="space-y-6">
-            {report.files && report.files.length > 0 ? (
-              <div className="space-y-4">
-                {report.files.map((file: any, index: number) => (
-                  <Card key={index}>
-                    <CardContent className="p-6">
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="flex items-center space-x-4">
-                          <div className="w-12 h-12 bg-primary/10 rounded-lg flex items-center justify-center">
-                            {getFileIcon(file.type)}
-                          </div>
-                          <div>
-                            <h3 className="font-medium">{file.file_name}</h3>
-                            <p className="text-sm text-muted-foreground">
-                              {file.type.toUpperCase()} • {formatFileSize(file.size_kb)}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Button variant="ghost" size="sm">
-                            <Eye className="w-4 h-4" />
-                          </Button>
-                          <Button variant="ghost" size="sm">
-                            <Download className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-12">
-                <p className="text-muted-foreground">No source files available for this report.</p>
-              </div>
-            )}
-          </TabsContent>
-        </Tabs>
-      ) : (
+      {/* AI Analysis Component */}
+      <AIAnalyzeTabs report={report} onUpdate={handleReportUpdate} />
+      
+      {/* Source Files Section */}
+      {report.files && report.files.length > 0 && (
         <Card>
-          <CardContent className="p-8">
-            {report.files && report.files.length > 0 && (
-              <div>
-                <p className="text-sm font-medium text-gray-500 mb-2">Files</p>
-                <div className="space-y-2">
-                  {report.files.map((file: any, index: number) => (
-                    <div key={index} className="flex items-center gap-2 p-2 border rounded">
-                      <FileText className="h-4 w-4" />
-                      <span className="text-sm">{file.file_name}</span>
-                      <Badge variant="outline" className="text-xs">
-                        {file.type}
-                      </Badge>
+          <CardContent className="p-6">
+            <h3 className="text-lg font-semibold mb-4">Source Files</h3>
+            <div className="space-y-4">
+              {report.files.map((file: any, index: number) => (
+                <div key={index} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div className="flex items-center space-x-4">
+                    <div className="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center">
+                      {getFileIcon(file.type)}
                     </div>
-                  ))}
+                    <div>
+                      <h4 className="font-medium">{file.file_name}</h4>
+                      <p className="text-sm text-muted-foreground">
+                        {file.type.toUpperCase()} • {formatFileSize(file.size_kb)}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Button variant="ghost" size="sm">
+                      <Eye className="w-4 h-4" />
+                    </Button>
+                    <Button variant="ghost" size="sm">
+                      <Download className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </div>
-              </div>
-            )}
-
-            <div className="text-center py-8 border-2 border-dashed border-gray-300 rounded-lg">
-              <Brain className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-              <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 mb-2">
-                No Analysis Available
-              </h3>
-              <p className="text-gray-600 dark:text-gray-400 mb-4">
-                This report hasn't been analyzed yet. Click the button above to run AI analysis.
-              </p>
+              ))}
             </div>
           </CardContent>
         </Card>
