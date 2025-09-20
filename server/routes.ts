@@ -38,7 +38,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use(cookieParser());
 
   // Health check endpoint for Railway
-  app.get("/", (req, res) => {
+  app.get("/api/health", (req, res) => {
     res.json({ 
       status: "ok", 
       message: "Report Intelligence API is running",
