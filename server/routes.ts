@@ -243,15 +243,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Process each file to extract text content
       for (const fileItem of report.files) {
         try {
-          // Fetch the file from storage
-          const fileName = fileItem.url.replace('uploads/', '');
+          // Fetch the file from storage - handle both old uploads/ and new objects/ URLs
+          let fileName = fileItem.url;
+          if (fileName.startsWith('/uploads/')) {
+            fileName = fileName.replace('/uploads/', '');
+          } else if (fileName.startsWith('/objects/')) {
+            fileName = fileName.replace('/objects/', '');
+          } else if (fileName.startsWith('uploads/')) {
+            fileName = fileName.replace('uploads/', '');
+          }
+          
           const fileBuffer = await fileStorage.getFile(fileName);
           if (fileBuffer) {
             // Create a mock file object for text extraction
             const mockFile = {
               buffer: fileBuffer,
               originalname: fileItem.file_name,
-              mimetype: fileItem.type
+              mimetype: fileItem.type === 'html' ? 'text/html' : fileItem.type
             } as Express.Multer.File;
 
             const extractedText = await extractText(mockFile);
