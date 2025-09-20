@@ -14,7 +14,7 @@ export default function ChartsBoard({ data }: ChartsBoardProps) {
     return (
       <Card>
         <CardContent className="p-6">
-          <p className="text-muted-foreground">No chart data available. Please analyze the report first.</p>
+          <p className="text-muted-foreground">داده‌های نمودار در دسترس نیست. لطفاً ابتدا گزارش را تحلیل کنید.</p>
         </CardContent>
       </Card>
     );

@@ -98,31 +98,31 @@ function generateMarkdownSummary(analysisData: any): string {
   const kpis = analysisData.kpis || [];
   const insights = analysisData.insights || [];
   
-  return `# Executive Summary
+  return `# خلاصه اجرایی
 
-## Overall Performance Score: ${score}/100
+## امتیاز عملکرد کلی: ${score}/100
 
-${analysisData.trend_summary || "Analysis data not available."}
+${analysisData.trend_summary || "داده‌های تحلیل در دسترس نیست."}
 
-## Key Performance Indicators
+## شاخص‌های کلیدی عملکرد
 
 ${kpis.map((kpi: any) => 
   `- **${kpi.name}**: ${kpi.value}${kpi.unit ? ` ${kpi.unit}` : ''} ${kpi.delta ? (kpi.delta >= 0 ? '↗️' : '↘️') : ''}`
 ).join('\n')}
 
-## Key Insights
+## بینش‌های کلیدی
 
 ${insights.map((insight: any) => 
   `- **${insight.type?.toUpperCase()}**: ${insight.text}`
 ).join('\n')}
 
-## Next Month Focus
+## تمرکز ماه آینده
 
-${analysisData.next_month_plan?.focus_themes?.map((theme: string) => `- ${theme}`).join('\n') || 'No specific themes identified.'}
+${analysisData.next_month_plan?.focus_themes?.map((theme: string) => `- ${theme}`).join('\n') || 'موضوعات خاصی شناسایی نشده است.'}
 
 ---
 
-*This analysis was generated automatically. Please review the detailed tabs for comprehensive insights and action plans.*`;
+*این تحلیل به صورت خودکار تولید شده است. لطفاً برای بینش‌های جامع و برنامه عملیاتی، تب‌های تفصیلی را مرور کنید.ns.*`;
 }
 
 function getSampleAnalysis(corpus: string) {

@@ -11,13 +11,13 @@ export default function SummaryTab({ markdown }: SummaryTabProps) {
     return (
       <Card>
         <CardContent className="p-6">
-          <p className="text-muted-foreground">No executive summary available. Please analyze the report first.</p>
+          <p className="text-muted-foreground">خلاصه اجرایی در دسترس نیست. لطفاً ابتدا گزارش را تحلیل کنید.</p>
         </CardContent>
       </Card>
     );
   }
 
-  // Simple markdown to HTML conversion for basic formatting
+  // تبدیل ساده markdown به HTML برای فرمت‌بندی پایه
   const formatMarkdown = (text: string) => {
     return text
       .replace(/^# (.+)$/gm, '<h1 class="text-2xl font-bold mb-4">$1</h1>')
@@ -34,7 +34,7 @@ export default function SummaryTab({ markdown }: SummaryTabProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Executive Summary</CardTitle>
+        <CardTitle>خلاصه اجرایی</CardTitle>
       </CardHeader>
       <CardContent>
         <div 

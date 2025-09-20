@@ -46,14 +46,14 @@ export const sampleAiJson = {
 };
 
 export const sampleMarkdown = `
-### Executive Summary
-- Orders and revenue are growing.
-- On-time rate close to target; needs attention.
-- Opportunities in B2B partnerships and dispatch optimization.
+### خلاصه اجرایی
+- سفارشات و درآمد در حال رشد هستند.
+- نرخ تحویل به موقع نزدیک به هدف است؛ نیاز به توجه دارد.
+- فرصت‌هایی در مشارکت‌های B2B و بهینه‌سازی ارسال وجود دارد.
 
-**Top Wins**
-- Same-day delivery uptake +18%.
+**بهترین دستاوردها**
+- افزایش 18 درصدی تحویل در همان روز.
 
-**Key Risks**
-- Weekend driver capacity.
+**ریسک‌های کلیدی**
+- ظرفیت راننده در آخر هفته.
 `;

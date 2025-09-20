@@ -33,8 +33,8 @@ export default function KPIsTab({ data }: KPIsTabProps) {
         <CardContent className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-lg font-semibold">Overall Performance Score</h3>
-              <p className="text-sm text-muted-foreground">Based on all KPIs and targets</p>
+              <h3 className="text-lg font-semibold">امتیاز عملکرد کلی</h3>
+              <p className="text-sm text-muted-foreground">بر اساس تمام KPI ها و اهداف</p>
             </div>
             <div className={`w-20 h-20 rounded-full ${getScoreColor(data.score)} flex items-center justify-center`}>
               <span className="text-2xl font-bold text-white">{data.score}</span>
