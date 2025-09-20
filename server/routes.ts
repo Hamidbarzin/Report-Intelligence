@@ -37,6 +37,15 @@ const upload = multer({
 export async function registerRoutes(app: Express): Promise<Server> {
   app.use(cookieParser());
 
+  // Health check endpoint for Railway
+  app.get("/", (req, res) => {
+    res.json({ 
+      status: "ok", 
+      message: "Report Intelligence API is running",
+      timestamp: new Date().toISOString()
+    });
+  });
+
   // Serve object storage files 
   app.get("/objects/:objectPath(*)", requireAdmin, async (req, res) => {
     try {
