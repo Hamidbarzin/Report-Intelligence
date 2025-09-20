@@ -83,12 +83,15 @@ Generate realistic data based on the document content. Include meaningful KPIs, 
     const aiJson = jsonSafeParse(rawJson);
     
     // Validate the parsed JSON against the schema
-    const validatedJson = AnalysisSchema.parse(aiJson);
+    const validatedJson = AnalysisSchema.safeParse(aiJson);
+    if (!validatedJson.success) {
+      throw new Error(`Schema validation failed: ${validatedJson.error.message}`);
+    }
 
     // Generate markdown summary
-    const aiMarkdown = generateMarkdownSummary(validatedJson);
+    const aiMarkdown = generateMarkdownSummary(validatedJson.data);
 
-    return { aiJson: validatedJson, aiMarkdown };
+    return { aiJson: validatedJson.data, aiMarkdown };
   } catch (error) {
     console.error("OpenAI analysis failed:", error);
     return getSampleAnalysis(corpus);

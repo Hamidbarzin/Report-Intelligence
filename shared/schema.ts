@@ -25,6 +25,7 @@ export interface FileItem {
   url: string;
   file_name: string;
   size_kb: number;
+  extracted_text?: string;
 }
 
 export interface KPI {
