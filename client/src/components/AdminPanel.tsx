@@ -22,10 +22,10 @@ export function AdminPanel() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: reports = [], isLoading } = useQuery<Report[]>({
+  const { data: reports = [], isLoading } = useQuery({
     queryKey: ["/api/admin/reports"],
     queryFn: getAdminReports
-  });
+  }) as { data: Report[], isLoading: boolean };
 
   const logoutMutation = useMutation({
     mutationFn: logout,

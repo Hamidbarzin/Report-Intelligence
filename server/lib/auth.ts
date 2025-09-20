@@ -16,14 +16,14 @@ export interface AuthenticatedRequest extends Request {
 }
 
 export function signToken(payload: AdminUser): string {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: "24h" });
+  return jwt.sign(payload, JWT_SECRET!, { expiresIn: "24h" });
 }
 
 export function verifyToken(token: string): AdminUser | null {
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as AdminUser;
+    const decoded = jwt.verify(token, JWT_SECRET!) as any;
     if (decoded.role === "admin") {
-      return decoded;
+      return decoded as AdminUser;
     }
     return null;
   } catch {

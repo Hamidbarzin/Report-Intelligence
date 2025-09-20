@@ -40,7 +40,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Serve in-memory uploaded files
   app.get("/uploads/*", async (req, res) => {
     try {
-      const fileName = req.params[0];
+      const fileName = req.params[0] || "";
       const buffer = await fileStorage.getFile(fileName);
 
       if (!buffer) {
@@ -48,14 +48,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Set appropriate content type and security headers
-      const ext = fileName.split('.').pop()?.toLowerCase();
-      const contentType = {
-        'pdf': 'application/pdf',
-        'html': 'text/plain', // Serve HTML as plain text to prevent XSS
-        'jpg': 'image/jpeg',
-        'jpeg': 'image/jpeg',
-        'png': 'image/png'
-      }[ext || ''] || 'application/octet-stream';
+      const ext = fileName.split('.').pop()?.toLowerCase() || '';
+      const contentType = ext === 'html' ? 'text/plain' : 'application/octet-stream';
 
       // Force download for HTML files to prevent same-origin execution
       if (ext === 'html') {

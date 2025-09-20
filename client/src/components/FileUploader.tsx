@@ -224,7 +224,7 @@ export function FileUploader({ onUploadComplete }: FileUploaderProps) {
               <Checkbox
                 id="autoAnalyze"
                 checked={autoAnalyze}
-                onCheckedChange={setAutoAnalyze}
+                onCheckedChange={(checked) => setAutoAnalyze(checked === true)}
                 data-testid="checkbox-auto-analyze"
               />
               <Label htmlFor="autoAnalyze">Auto-analyze after upload</Label>
