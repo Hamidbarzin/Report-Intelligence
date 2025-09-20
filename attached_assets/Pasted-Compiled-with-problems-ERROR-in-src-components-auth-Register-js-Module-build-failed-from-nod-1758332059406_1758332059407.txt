@@ -1,0 +1,60 @@
+Compiled with problems:
+×
+ERROR in ./src/components/auth/Register.js
+Module build failed (from ./node_modules/babel-loader/lib/index.js):
+SyntaxError: /Users/hamidrezazebardast/Desktop/Startup/crypto-web/src/components/auth/Register.js: Unexpected token (272:9)
+
+  270 |                     fontWeight: 600,
+  271 |                     '&:hover': {
+> 272 |          
+      |          ^
+    at constructor (/Users/hamidrezazebardast/Desktop/Startup/crypto-web/node_modules/@babel/parser/lib/index.js:367:19)
+    at FlowParserMixin.raise (/Users/hamidrezazebardast/Desktop/Startup/crypto-web/node_modules/@babel/parser/lib/index.js:6630:19)
+    at FlowParserMixin.unexpected (/Users/hamidrezazebardast/Desktop/Startup/crypto-web/node_modules/@babel/parser/lib/index.js:6650:16)
+    at FlowParserMixin.parsePropertyName (/Users/hamidrezazebardast/Desktop/Startup/crypto-web/node_modules/@babel/parser/lib/index.js:12034:18)
+    at FlowParserMixin.parsePropertyDefinition (/Users/hamidrezazebardast/Desktop/Startup/crypto-web/node_modules/@babel/parser/lib/index.js:11899:10)
+    at FlowParserMixin.parseObjectLike (/Users/hamidrezazebardast/Desktop/Startup/crypto-web/node_modules/@babel/parser/lib/index.js:11840:21)
+    at FlowParserMixin.parseExprAtom (/Users/hamidrezazebardast/Desktop/Startup/crypto-web/node_modules/@babel/parser/lib/index.js:11343:23)
+    at FlowParserMixin.parseExprAtom (/Users/hamidrezazebardast/Desktop/Startup/crypto-web/node_modules/@babel/parser/lib/index.js:4797:20)
+    at FlowParserMixin.parseExprSubscripts (/Users/hamidrezazebardast/Desktop/Startup/crypto-web/node_modules/@babel/parser/lib/index.js:11085:23)
+    at FlowParserMixin.parseUpdate (/Users/hamidrezazebardast/Desktop/Startup/crypto-web/node_modules/@babel/parser/lib/index.js:11070:21)
+    at FlowParserMixin.parseMaybeUnary (/Users/hamidrezazebardast/Desktop/Startup/crypto-web/node_modules/@babel/parser/lib/index.js:11050:23)
+    at FlowParserMixin.parseMaybeUnaryOrPrivate (/Users/hamidrezazebardast/Desktop/Startup/crypto-web/node_modules/@babel/parser/lib/index.js:10903:61)
+    at FlowParserMixin.parseExprOps (/Users/hamidrezazebardast/Desktop/Startup/crypto-web/node_modules/@babel/parser/lib/index.js:10908:23)
+    at FlowParserMixin.parseMaybeConditional (/Users/hamidrezazebardast/Desktop/Startup/crypto-web/node_modules/@babel/parser/lib/index.js:10885:23)
+    at FlowParserMixin.parseMaybeAssign (/Users/hamidrezazebardast/Desktop/Startup/crypto-web/node_modules/@babel/parser/lib/index.js:10835:21)
+    at FlowParserMixin.parseMaybeAssign (/Users/hamidrezazebardast/Desktop/Startup/crypto-web/node_modules/@babel/parser/lib/index.js:3582:18)
+    at /Users/hamidrezazebardast/Desktop/Startup/crypto-web/node_modules/@babel/parser/lib/index.js:10804:39
+    at FlowParserMixin.allowInAnd (/Users/hamidrezazebardast/Desktop/Startup/crypto-web/node_modules/@babel/parser/lib/index.js:12436:12)
+    at FlowParserMixin.parseMaybeAssignAllowIn (/Users/hamidrezazebardast/Desktop/Startup/crypto-web/node_modules/@babel/parser/lib/index.js:10804:17)
+    at FlowParserMixin.parseMaybeAssignAllowInOrVoidPattern (/Users/hamidrezazebardast/Desktop/Startup/crypto-web/node_modules/@babel/parser/lib/index.js:12503:17)
+    at FlowParserMixin.parseObjectProperty (/Users/hamidrezazebardast/Desktop/Startup/crypto-web/node_modules/@babel/parser/lib/index.js:11960:83)
+    at FlowParserMixin.parseObjPropValue (/Users/hamidrezazebardast/Desktop/Startup/crypto-web/node_modules/@babel/parser/lib/index.js:11988:100)
+    at FlowParserMixin.parseObjPropValue (/Users/hamidrezazebardast/Desktop/Startup/crypto-web/node_modules/@babel/parser/lib/index.js:3372:26)
+    at FlowParserMixin.parsePropertyDefinition (/Users/hamidrezazebardast/Desktop/Startup/crypto-web/node_modules/@babel/parser/lib/index.js:11925:17)
+    at FlowParserMixin.parseObjectLike (/Users/hamidrezazebardast/Desktop/Startup/crypto-web/node_modules/@babel/parser/lib/index.js:11840:21)
+    at FlowParserMixin.parseExprAtom (/Users/hamidrezazebardast/Desktop/Startup/crypto-web/node_modules/@babel/parser/lib/index.js:11343:23)
+    at FlowParserMixin.parseExprAtom (/Users/hamidrezazebardast/Desktop/Startup/crypto-web/node_modules/@babel/parser/lib/index.js:4797:20)
+    at FlowParserMixin.parseExprSubscripts (/Users/hamidrezazebardast/Desktop/Startup/crypto-web/node_modules/@babel/parser/lib/index.js:11085:23)
+    at FlowParserMixin.parseUpdate (/Users/hamidrezazebardast/Desktop/Startup/crypto-web/node_modules/@babel/parser/lib/index.js:11070:21)
+    at FlowParserMixin.parseMaybeUnary (/Users/hamidrezazebardast/Desktop/Startup/crypto-web/node_modules/@babel/parser/lib/index.js:11050:23)
+    at FlowParserMixin.parseMaybeUnaryOrPrivate (/Users/hamidrezazebardast/Desktop/Startup/crypto-web/node_modules/@babel/parser/lib/index.js:10903:61)
+    at FlowParserMixin.parseExprOps (/Users/hamidrezazebardast/Desktop/Startup/crypto-web/node_modules/@babel/parser/lib/index.js:10908:23)
+    at FlowParserMixin.parseMaybeConditional (/Users/hamidrezazebardast/Desktop/Startup/crypto-web/node_modules/@babel/parser/lib/index.js:10885:23)
+    at FlowParserMixin.parseMaybeAssign (/Users/hamidrezazebardast/Desktop/Startup/crypto-web/node_modules/@babel/parser/lib/index.js:10835:21)
+    at FlowParserMixin.parseMaybeAssign (/Users/hamidrezazebardast/Desktop/Startup/crypto-web/node_modules/@babel/parser/lib/index.js:3582:18)
+    at FlowParserMixin.parseExpressionBase (/Users/hamidrezazebardast/Desktop/Startup/crypto-web/node_modules/@babel/parser/lib/index.js:10788:23)
+    at /Users/hamidrezazebardast/Desktop/Startup/crypto-web/node_modules/@babel/parser/lib/index.js:10784:39
+    at FlowParserMixin.allowInAnd (/Users/hamidrezazebardast/Desktop/Startup/crypto-web/node_modules/@babel/parser/lib/index.js:12436:12)
+    at FlowParserMixin.parseExpression (/Users/hamidrezazebardast/Desktop/Startup/crypto-web/node_modules/@babel/parser/lib/index.js:10784:17)
+    at FlowParserMixin.jsxParseExpressionContainer (/Users/hamidrezazebardast/Desktop/Startup/crypto-web/node_modules/@babel/parser/lib/index.js:4665:31)
+    at FlowParserMixin.jsxParseAttributeValue (/Users/hamidrezazebardast/Desktop/Startup/crypto-web/node_modules/@babel/parser/lib/index.js:4637:21)
+    at FlowParserMixin.jsxParseAttribute (/Users/hamidrezazebardast/Desktop/Startup/crypto-web/node_modules/@babel/parser/lib/index.js:4686:38)
+    at FlowParserMixin.jsxParseOpeningElementAfterName (/Users/hamidrezazebardast/Desktop/Startup/crypto-web/node_modules/@babel/parser/lib/index.js:4700:28)
+    at FlowParserMixin.jsxParseOpeningElementAfterName (/Users/hamidrezazebardast/Desktop/Startup/crypto-web/node_modules/@babel/parser/lib/index.js:4101:18)
+    at FlowParserMixin.jsxParseOpeningElementAt (/Users/hamidrezazebardast/Desktop/Startup/crypto-web/node_modules/@babel/parser/lib/index.js:4695:17)
+    at FlowParserMixin.jsxParseElementAt (/Users/hamidrezazebardast/Desktop/Startup/crypto-web/node_modules/@babel/parser/lib/index.js:4719:33)
+    at FlowParserMixin.jsxParseElementAt (/Users/hamidrezazebardast/Desktop/Startup/crypto-web/node_modules/@babel/parser/lib/index.js:4731:32)
+    at FlowParserMixin.jsxParseElementAt (/Users/hamidrezazebardast/Desktop/Startup/crypto-web/node_modules/@babel/parser/lib/index.js:4731:32)
+    at FlowParserMixin.jsxParseElementAt (/Users/hamidrezazebardast/Desktop/Startup/crypto-web/node_modules/@babel/parser/lib/index.js:4731:32)
+    at FlowParserMixin.jsxParseElementAt (/Users/hamidrezazebardast/Desktop/Startup/crypto-web/node_modules/@babel/parser/lib/index.js:4731:32)
