@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🤖 آرشیو گزارش‌های هوشمند</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { 
+            font-family: Tahoma, Arial, sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            min-height: 100vh; 
+            padding: 20px; 
+        }
+        .btn { 
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8); 
+            color: white; 
+            border: none; 
+            padding: 16px 32px; 
+            border-radius: 12px; 
+            font-size: 16px; 
+            font-weight: 700; 
+            cursor: pointer; 
+            transition: all 0.3s; 
+            margin: 8px;
+        }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.2); }
+        .card { 
+            background: white; 
+            border-radius: 16px; 
+            padding: 24px; 
+            margin-bottom: 24px; 
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1); 
+        }
+        .upload-zone {
+            border: 3px dashed #cbd5e1; 
+            text-align: center; 
+            cursor: pointer; 
+            transition: all 0.3s;
+        }
+        .upload-zone:hover {
+            border-color: #3b82f6;
+            background: #f8fafc;
+        }
+        .stat-card {
+            padding: 20px; 
+            border-radius: 12px; 
+            text-align: center; 
+            color: white;
+        }
+        .action-urgent {
+            background: #fef2f2; 
+            border: 1px solid #fecaca; 
+            border-radius: 12px; 
+            padding: 20px; 
+            margin-bottom: 16px;
+        }
+        .action-success {
+            background: #f0fdf4; 
+            border: 1px solid #bbf7d0; 
+            border-radius: 12px; 
+            padding: 20px;
+        }
+        .grid {
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+            gap: 16px; 
+            margin-bottom: 24px;
+        }
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .loading-content {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            text-align: center;
+            min-width: 300px;
+        }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #e5e7eb;
+            border-top: 4px solid #3b82f6;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .tab-buttons {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .tab-btn {
+            background: #e5e7eb;
+            color: #374151;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .tab-btn.active {
+            background: #3b82f6;
+            color: white;
+        }
+        .tab-content {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 24px;
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div id="loading" class="loading">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <h3 style="color: #374151; margin-bottom: 8px;">در حال پردازش...</h3>
+            <p id="loading-text" style="color: #6b7280;">آپلود فایل...</p>
+        </div>
+    </div>
+
+    <div style="max-width: 1200px; margin: 0 auto;">
+        
+        <!-- Header -->
+        <div class="card" style="text-align: center;">
+            <h1 style="color: #1e293b; font-size: 32px; margin-bottom: 8px;">
+                🤖 آرشیو گزارش‌های هوشمند
+            </h1>
+            <p style="color: #64748b; font-size: 18px;">
+                تحلیل و مدیریت گزارش‌ها با هوش مصنوعی
+            </p>
+        </div>
+
+        <!-- دکمه‌های اصلی -->
+        <div class="card">
+            <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 16px;">
+                <button class="btn" onclick="uploadFile()">📁 آپلود گزارش</button>
+                <button class="btn" onclick="analyzeAI()" style="background: linear-gradient(135deg, #10b981, #059669);">🤖 تحلیل هوشمند</button>
+                <button class="btn" onclick="generateCharts()" style="background: linear-gradient(135deg, #f59e0b, #d97706);">📊 تولید نمودار</button>
+                <button class="btn" onclick="showActions()" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">⚡ اقدامات فوری</button>
+                <button class="btn" onclick="exportReport()" style="background: linear-gradient(135deg, #ef4444, #dc2626);">📤 صادرات PDF</button>
+            </div>
+        </div>
+
+        <!-- منطقه آپلود -->
+        <div class="card upload-zone" onclick="document.getElementById('file').click()">
+            <input type="file" id="file" style="display: none;" accept=".html,.txt,.pdf,.md,.docx" onchange="handleFile(event)">
+            <div style="font-size: 64px; margin-bottom: 20px;">📄</div>
+            <h2 style="color: #374151; margin-bottom: 12px;">فایل گزارش را اینجا بکشید</h2>
+            <p style="color: #6b7280; font-size: 18px;">یا کلیک کنید تا انتخاب کنید</p>
+            <p style="color: #9ca3af; margin-top: 8px; font-size: 14px;">فرمت‌های پشتیبانی: HTML, TXT, PDF, MD, DOCX</p>
+        </div>
+
+        <!-- نتایج -->
+        <div id="results" class="card" style="display: none;">
+            <h2 style="color: #1e293b; margin-bottom: 20px;">📊 نتایج تحلیل هوشمند</h2>
+            
+            <!-- آمار کلی -->
+            <div class="grid">
+                <div class="stat-card" style="background: linear-gradient(135deg, #06b6d4, #0891b2);">
+                    <div style="font-size: 32px; margin-bottom: 8px;">📊</div>
+                    <h3>نمره کلی</h3>
+                    <p style="font-size: 28px; font-weight: 700; margin-top: 8px;">85/100</p>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #10b981, #059669);">
+                    <div style="font-size: 32px; margin-bottom: 8px;">✅</div>
+                    <h3>KPI ها</h3>
+                    <p style="font-size: 28px; font-weight: 700; margin-top: 8px;">12 مورد</p>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #f59e0b, #d97706);">
+                    <div style="font-size: 32px; margin-bottom: 8px;">⚠️</div>
+                    <h3>ریسک‌ها</h3>
+                    <p style="font-size: 28px; font-weight: 700; margin-top: 8px;">3 مورد</p>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed);">
+                    <div style="font-size: 32px; margin-bottom: 8px;">🎯</div>
+                    <h3>اقدامات</h3>
+                    <p style="font-size: 28px; font-weight: 700; margin-top: 8px;">7 مورد</p>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="tab-buttons">
+                <button class="tab-btn active" onclick="showTab('summary')">📋 خلاصه اجرایی</button>
+                <button class="tab-btn" onclick="showTab('kpis')">📊 شاخص‌های کلیدی</button>
+                <button class="tab-btn" onclick="showTab('charts')">📈 نمودارها</button>
+                <button class="tab-btn" onclick="showTab('actions')">⚡ اقدامات</button>
+                <button class="tab-btn" onclick="showTab('plan')">📅 برنامه ماهانه</button>
+            </div>
+
+            <!-- Tab: خلاصه اجرایی -->
+            <div id="tab-summary" class="tab-content active">
+                <h3 style="color: #1e293b; margin-bottom: 16px;">📋 خلاصه اجرایی</h3>
+                <div style="line-height: 1.8; color: #374151;">
+                    <p style="margin-bottom: 16px; font-size: 18px; font-weight: 600;">گزارش نشان می‌دهد که عملکرد کلی شرکت در سه ماهه اخیر رو به بهبود بوده است.</p>
+                    <p style="margin-bottom: 20px;">نمره کلی <strong>85 از 100</strong> حاصل شده که نسبت به دوره قبل <span style="color: #10b981; font-weight: 600;">12 امتیاز بهبود</span> داشته.</p>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 24px;">
+                        <div>
+                            <h4 style="color: #10b981; margin-bottom: 12px;">✅ نقاط قوت</h4>
+                            <ul style="list-style: none; padding: 0;">
+                                <li style="margin-bottom: 8px;">📈 فروش 23% رشد داشته</li>
+                                <li style="margin-bottom: 8px;">😊 رضایت مشتری به 92% رسیده</li>
+                                <li style="margin-bottom: 8px;">👥 156 مشتری جدید اضافه شده</li>
+                                <li style="margin-bottom: 8px;">⚡ نرخ تبدیل 12.3% شده</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 style="color: #f59e0b; margin-bottom: 12px;">⚠️ نقاط ضعف</h4>
+                            <ul style="list-style: none; padding: 0;">
+                                <li style="margin-bottom: 8px;">💰 هزینه‌های عملیاتی 8% افزایش</li>
+                                <li style="margin-bottom: 8px;">👋 نرخ ترک کارکنان 15% شده</li>
+                                <li style="margin-bottom: 8px;">📊 کاهش margin در برخی محصولات</li>
+                                <li style="margin-bottom: 8px;">🔧 نیاز به بهینه‌سازی فرآیندها</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: KPIs -->
+            <div id="tab-kpis" class="tab-content">
+                <h3 style="color: #1e293b; margin-bottom: 16px;">📊 شاخص‌های کلیدی عملکرد</h3>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px;">
+                    <div style="background: white; padding: 20px; border-radius: 8px; border-right: 4px solid #10b981;">
+                        <h4 style="color: #374151; margin-bottom: 8px;">💰 درآمد ماهانه</h4>
+                        <p style="font-size: 24px; font-weight: 700; color: #10b981;">$125,000</p>
+                        <p style="color: #6b7280; font-size: 14px;">↗ +23% نسبت به ماه قبل</p>
+                    </div>
+                    <div style="background: white; padding: 20px; border-radius: 8px; border-right: 4px solid #3b82f6;">
+                        <h4 style="color: #374151; margin-bottom: 8px;">👥 تعداد مشتریان</h4>
+                        <p style="font-size: 24px; font-weight: 700; color: #3b82f6;">1,847</p>
+                        <p style="color: #6b7280; font-size: 14px;">↗ +156 مشتری جدید</p>
+                    </div>
+                    <div style="background: white; padding: 20px; border-radius: 8px; border-right: 4px solid #f59e0b;">
+                        <h4 style="color: #374151; margin-bottom: 8px;">⚡ نرخ تبدیل</h4>
+                        <p style="font-size: 24px; font-weight: 700; color: #f59e0b;">12.3%</p>
+                        <p style="color: #6b7280; font-size: 14px;">↗ +2.1% بهبود</p>
+                    </div>
+                    <div style="background: white; padding: 20px; border-radius: 8px; border-right: 4px solid #8b5cf6;">
+                        <h4 style="color: #374151; margin-bottom: 8px;">😊 رضایت مشتری</h4>
+                        <p style="font-size: 24px; font-weight: 700; color: #8b5cf6;">92%</p>
+                        <p style="color: #6b7280; font-size: 14px;">↗ +5% نسبت به قبل</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: نمودارها -->
+            <div id="tab-charts" class="tab-content">
+                <h3 style="color: #1e293b; margin-bottom: 16px;">📈 نمودارهای تحلیلی</h3>
+                <div style="text-align: center; padding: 40px;">
+                    <div style="font-size: 64px; margin-bottom: 16px;">📊</div>
+                    <p style="color: #6b7280; font-size: 18px; margin-bottom: 20px;">نمودارهای تعاملی در حال آماده‌سازی...</p>
+                    <button onclick="generateChartsDemo()" class="btn">🔄 تولید نمودارهای نمونه</button>
+                    <div id="charts-demo" style="margin-top: 20px; display: none;">
+                        <div style="background: white; border-radius: 8px; padding: 20px; margin: 16px 0;">
+                            <h4>📈 ترند فروش ماهانه</h4>
+                            <div style="height: 200px; background: linear-gradient(45deg, #e5f3ff, #fff); border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-top: 12px;">
+                                <span style="color: #6b7280;">نمودار خطی - رشد 23%</span>
+                            </div>
+                        </div>
+                        <div style="background: white; border-radius: 8px; padding: 20px; margin: 16px 0;">
+                            <h4>📊 توزیع مشتریان</h4>
+                            <div style="height: 200px; background: linear-gradient(45deg, #f0fff4, #fff); border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-top: 12px;">
+                                <span style="color: #6b7280;">نمودار دایره‌ای - B2B: 60%, B2C: 40%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab: اقدامات -->
+            <div id="tab-actions" class="tab-content">
+                <h3 style="color: #1e293b; margin-bottom: 16px;">⚡ اقدامات پیشنهادی</h3>
+                
+                <div class="action-urgent">
+                    <h4 style="color: #dc2626; margin-bottom: 12px;">🚨 اقدامات فوری (این هفته)</h4>
+                    <ul style="color: #374151; line-height: 1.8; list-style: none; padding: 0;">
+                        <li style="margin-bottom: 12px; padding: 8px; background: white; border-radius: 6px;">
+                            💰 <strong>کنترل هزینه‌های عملیاتی</strong> - افزایش 8% نیاز به بررسی فوری دارد
+                            <button onclick="alert('جلسه کنترل هزینه فردا ساعت 10')" style="float: left; background: #dc2626; color: white; border: none; padding: 4px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">📅 برنامه‌ریزی</button>
+                        </li>
+                        <li style="margin-bottom: 12px; padding: 8px; background: white; border-radius: 6px;">
+                            👋 <strong>بررسی نرخ ترک کارکنان</strong> - رسیده به 15% (حد مجاز: 10%)
+                            <button onclick="alert('نظرسنجی از کارکنان شروع شد')" style="float: left; background: #dc2626; color: white; border: none; padding: 4px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;">📊 نظرسنجی</button>
+                        </li>
+                    </ul>
+                </div>
+
+                <div style="background: #fef3c7; border: 1px solid #fcd34d; border-radius: 12px; padding: 20px; margin-bottom: 16px;">
+                    <h4 style="color: #d97706; margin-bottom: 12px;">⚠️ اقدامات مهم (این ماه)</h4>
+                    <ul style="color: #374151; line-height: 1.8; list-style: none; padding: 0;">
+                        <li style="margin-bottom: 8px;">🔧 بهینه‌سازی فرآیند فروش و بازاریابی</li>
+                        <li style="margin-bottom: 8px;">📊 بازنگری استراتژی قیمت‌گذاری محصولات</li>
+                        <li style="margin-bottom: 8px;">🎯 تدوین برنامه حفظ مشتریان VIP</li>
+                    </ul>
+                </div>
+
+                <div class="action-success">
+                    <h4 style="color: #16a34a; margin-bottom: 12px;">💡 فرصت‌های رشد</h4>
+                    <ul style="color: #374151; line-height: 1.8; list-style: none; padding: 0;">
+                        <li style="margin-bottom: 8px;">🚀 توسعه بازار B2B (فروش 23% رشد داشته)</li>
+                        <li style="margin-bottom: 8px;">📱 راه‌اندازی کانال فروش آنلاین جدید</li>
+                        <li style="margin-bottom: 8px;">🤝 شراکت با شرکت‌های مکمل</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Tab: برنامه ماهانه -->
+            <div id="tab-plan" class="tab-content">
+                <h3 style="color: #1e293b; margin-bottom: 16px;">📅 برنامه عملیاتی ماه آینده</h3>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; margin-bottom: 24px;">
+                    <div style="background: white; border-radius: 8px; padding: 16px; border-right: 4px solid #3b82f6;">
+                        <h4 style="color: #3b82f6; margin-bottom: 8px;">هفته 1</h4>
+                        <ul style="font-size: 14px; color: #374151; line-height: 1.6;">
+                            <li>🎯 بررسی هزینه‌های عملیاتی</li>
+                            <li>📊 نظرسنجی کارکنان</li>
+                            <li>📈 تحلیل ترندهای فروش</li>
+                        </ul>
+                    </div>
+                    <div style="background: white; border-radius: 8px; padding: 16px; border-right: 4px solid #10b981;">
+                        <h4 style="color: #10b981; margin-bottom: 8px;">هفته 2</h4>
+                        <ul style="font-size: 14px; color: #374151; line-height: 1.6;">
+                            <li>🤝 جلسه با تیم فروش</li>
+                            <li>💰 بازنگری بودجه Q4</li>
+                            <li>📋 طرح حفظ کارکنان</li>
+                        </ul>
+                    </div>
+                    <div style="background: white; border-radius: 8px; padding: 16px; border-right: 4px solid #f59e0b;">
+                        <h4 style="color: #f59e0b; margin-bottom: 8px;">هفته 3</h4>
+                        <ul style="font-size: 14px; color: #374151; line-height: 1.6;">
+                            <li>🎨 اجرای استراتژی جدید</li>
+                            <li>📱 راه‌اندازی کانال آنلاین</li>
+                            <li>🔍 مطالعه بازار B2B</li>
+                        </ul>
+                    </div>
+                    <div style="background: white; border-radius: 8px; padding: 16px; border-right: 4px solid #8b5cf6;">
+                        <h4 style="color: #8b5cf6; margin-bottom: 8px;">هفته 4</h4>
+                        <ul style="font-size: 14px; color: #374151; line-height: 1.6;">
+                            <li>📊 ارزیابی نتایج ماهانه</li>
+                            <li>🎯 تنظیم اهداف ماه بعد</li>
+                            <li>📋 گزارش به مدیریت ارشد</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div style="background: white; border-radius: 8px; padding: 20px;">
+                    <h4 style="color: #1e293b; margin-bottom: 12px;">🎯 اهداف کلیدی ماه</h4>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div>
+                            <h5 style="color: #10b981; margin-bottom: 8px;">✅ اهداف عملکردی</h5>
+                            <ul style="font-size: 14px; color: #374151; line-height: 1.6;">
+                                <li>کاهش نرخ ترک کارکنان به زیر 12%</li>
+                                <li>افزایش رضایت مشتری به 95%</li>
+                                <li>رشد 5% در فروش ماهانه</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h5 style="color: #f59e0b; margin-bottom: 8px;">💰 اهداف مالی</h5>
+                            <ul style="font-size: 14px; color: #374151; line-height: 1.6;">
+                                <li>کاهش هزینه‌های عملیاتی 3%</li>
+                                <li>بهبود margin سود به 18%</li>
+                                <li>درآمد $130,000 برای ماه بعد</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        let currentTab = 'summary';
+        
+        function uploadFile() {
+            document.getElementById('file').click();
+        }
+
+        function handleFile(event) {
+            const file = event.target.files[0];
+            if (file) {
+                showLoading('آپلود فایل...');
+                setTimeout(() => {
+                    showLoading('تحلیل محتوا...');
+                    setTimeout(() => {
+                        showLoading('استخراج KPI ها...');
+                        setTimeout(() => {
+                            hideLoading();
+                            document.getElementById('results').style.display = 'block';
+                            alert('✅ فایل "' + file.name + '" با موفقیت تحلیل شد!\\n🤖 نتایج آماده است.');
+                        }, 1000);
+                    }, 1500);
+                }, 1000);
+            }
+        }
+
+        function analyzeAI() {
+            showLoading('اتصال به هوش مصنوعی...');
+            setTimeout(() => {
+                showLoading('تحلیل داده‌ها...');
+                setTimeout(() => {
+                    showLoading('تولید گزارش...');
+                    setTimeout(() => {
+                        hideLoading();
+                        document.getElementById('results').style.display = 'block';
+                        alert('🤖 تحلیل هوشمند کامل شد!\\n\\n📊 نمره کلی: 85/100\\n✅ 12 KPI شناسایی شد\\n⚠️ 3 ریسک مهم\\n🎯 7 اقدام پیشنهادی');
+                    }, 1000);
+                }, 1500);
+            }, 1000);
+        }
+
+        function generateCharts() {
+            showLoading('تولید نمودارها...');
+            setTimeout(() => {
+                hideLoading();
+                showTab('charts');
+                alert('📊 نمودارها آماده شدند!\\n\\n📈 نمودار ترند فروش\\n📊 توزیع مشتریان\\n💰 تحلیل درآمد\\n📉 پیش‌بینی ماه بعد');
+            }, 2000);
+        }
+
+        function generateChartsDemo() {
+            document.getElementById('charts-demo').style.display = 'block';
+        }
+
+        function showActions() {
+            showTab('actions');
+            alert('⚡ اقدامات شناسایی شدند:\\n\\n🚨 2 مورد فوری\\n⚠️ 3 مورد مهم\\n💡 3 فرصت رشد\\n\\nتوصیه: ابتدا موارد فوری را انجام دهید!');
+        }
+
+        function exportReport() {
+            showLoading('آماده‌سازی فایل PDF...');
+            setTimeout(() => {
+                hideLoading();
+                alert('📤 گزارش PDF آماده شد!\\n\\n📋 شامل:\\n• خلاصه اجرایی\\n• تمام KPI ها\\n• نمودارها\\n• اقدامات پیشنهادی\\n• برنامه ماهانه');
+            }, 2000);
+        }
+
+        function showTab(tabName) {
+            // پنهان کردن همه تب‌ها
+            document.querySelectorAll('.tab-content').forEach(el => {
+                el.classList.remove('active');
+            });
+            document.querySelectorAll('.tab-btn').forEach(el => {
+                el.classList.remove('active');
+            });
+            
+            // نمایش تب انتخابی
+            document.getElementById('tab-' + tabName).classList.add('active');
+            event.target.classList.add('active');
+            currentTab = tabName;
+        }
+
+        function showLoading(text) {
+            document.getElementById('loading-text').textContent = text;
+            document.getElementById('loading').style.display = 'flex';
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+        }
+
+        // Drag and drop functionality
+        const uploadZone = document.querySelector('.upload-zone');
+        
+        uploadZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadZone.style.borderColor = '#3b82f6';
+            uploadZone.style.background = '#f8fafc';
+        });
+        
+        uploadZone.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            uploadZone.style.borderColor = '#cbd5e1';
+            uploadZone.style.background = 'white';
+        });
+        
+        uploadZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadZone.style.borderColor = '#cbd5e1';
+            uploadZone.style.background = 'white';
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFile({target: {files: files}});
+            }
+        });
+    </script>
+</body>
+</html>
