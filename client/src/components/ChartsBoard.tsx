@@ -21,14 +21,13 @@ export default function ChartsBoard({ data }: ChartsBoardProps) {
   }
 
   const renderChart = (chart: AnalysisData['charts'][0], index: number) => {
-    const chartData = chart.series[0]?.points.map(point => ({
-      name: point.x,
-      value: point.y,
-      ...chart.series.reduce((acc, series, seriesIndex) => {
-        const point = series.points.find(p => p.x === chart.series[0].points.find(p2 => p2.x === point.x)?.x);
-        acc[series.name] = point?.y || 0;
-        return acc;
-      }, {} as Record<string, number>)
+    const chartData = chart.series[0]?.points.map(basePoint => ({
+      name: basePoint.x,
+      value: basePoint.y,
+      ...Object.fromEntries(chart.series.map(series => [
+        series.name, 
+        series.points.find(p => p.x === basePoint.x)?.y ?? 0
+      ]))
     })) || [];
 
     switch (chart.type) {

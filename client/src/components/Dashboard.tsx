@@ -24,7 +24,7 @@ export function Dashboard() {
                          (report.ai_markdown && report.ai_markdown.toLowerCase().includes(searchQuery.toLowerCase()));
     
     const matchesFilter = filterBy === "all" || 
-                         (filterBy === "high-score" && report.score && parseFloat(report.score) >= 8) ||
+                         (filterBy === "high-score" && report.score && parseFloat(report.score) >= 80) ||
                          (filterBy === "recent" && new Date(report.upload_date) > new Date(Date.now() - 7 * 24 * 60 * 60 * 1000));
     
     return matchesSearch && matchesFilter;
@@ -119,7 +119,7 @@ export function Dashboard() {
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="all">All Reports</SelectItem>
-              <SelectItem value="high-score">High Score (8+)</SelectItem>
+              <SelectItem value="high-score">High Score (80+)</SelectItem>
               <SelectItem value="recent">Recent (7 days)</SelectItem>
             </SelectContent>
           </Select>

@@ -22,7 +22,7 @@ export function AdminPanel() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: reports = [], isLoading } = useQuery({
+  const { data: reports = [], isLoading } = useQuery<Report[]>({
     queryKey: ["/api/admin/reports"],
     queryFn: getAdminReports
   });
