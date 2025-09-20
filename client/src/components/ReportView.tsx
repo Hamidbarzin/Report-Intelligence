@@ -332,3 +332,90 @@ export function ReportView() {
     </div>
   );
 }
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { FileText, AlertTriangle, CheckCircle } from "lucide-react";
+
+interface ReportViewProps {
+  report: any;
+}
+
+export default function ReportView({ report }: ReportViewProps) {
+  if (!report) return null;
+
+  return (
+    <div className="space-y-6">
+      {/* محتوای اصلی */}
+      {report.content ? (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              📋 محتوای گزارش
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div 
+              className="prose prose-slate max-w-none dark:prose-invert"
+              dangerouslySetInnerHTML={{ __html: report.content }}
+            />
+          </CardContent>
+        </Card>
+      ) : (
+        <Card>
+          <CardContent className="p-6 text-center">
+            <div className="action-urgent">
+              <AlertTriangle className="h-8 w-8 text-red-500 mx-auto mb-3" />
+              <h3 className="text-lg font-semibold text-red-800 mb-2">⚠️ مشکل در خواندن فایل</h3>
+              <div className="text-sm text-red-600 space-y-2">
+                <p>• HTML ممکنه به درستی parse نشه</p>
+                <p>• Encoding مشکل داشته باشه (UTF-8)</p>
+                <p>• فایل خراب یا ناقص باشه</p>
+                <p>• محتوا در دیتابیس ذخیره نمی‌شه</p>
+                <p>• فیلد content خالی میمونه</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* اطلاعات فایل */}
+      {report.files && report.files.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>📁 فایل‌های منبع</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {report.files.map((file: any, idx: number) => (
+              <div key={idx} className="flex items-center justify-between p-3 border rounded-lg mb-2">
+                <div>
+                  <p className="font-medium">{file.file_name}</p>
+                  <p className="text-sm text-gray-500">
+                    {file.type} • {file.size_kb} KB
+                  </p>
+                </div>
+                <Badge variant="outline">{file.type}</Badge>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
+
+      {/* وضعیت پردازش */}
+      <Card>
+        <CardContent className="p-6">
+          <div className="action-success">
+            <CheckCircle className="h-6 w-6 text-green-500 mb-2" />
+            <h4 className="font-semibold mb-2">✅ اقدامات پیشنهادی:</h4>
+            <div className="text-sm space-y-1">
+              <p>• فایل size limit چک کن</p>
+              <p>• MIME type رو درست تنظیم کن</p>
+              <p>• Error handling اضافه کن</p>
+              <p>• Loading state نشون بده</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

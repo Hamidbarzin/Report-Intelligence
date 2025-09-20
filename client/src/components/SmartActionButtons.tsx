@@ -116,7 +116,7 @@ export default function SmartActionButtons({ report, onAnalyze, onUpdate }: Smar
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Zap className="h-5 w-5 text-blue-500" />
-            اقدامات هوشمند
+            🤖 آرشیو گزارش‌های هوشمند
             {hasAI && (
               <Badge className={`${getScoreBadgeColor(score)} text-white`}>
                 امتیاز: {score}/100
@@ -130,14 +130,14 @@ export default function SmartActionButtons({ report, onAnalyze, onUpdate }: Smar
               <Button 
                 onClick={handleQuickAnalysis}
                 disabled={loading === "analysis"}
-                className="flex items-center gap-2 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700"
+                className="btn flex items-center gap-2"
               >
                 {loading === "analysis" ? (
                   <RefreshCw className="h-4 w-4 animate-spin" />
                 ) : (
                   <Brain className="h-4 w-4" />
                 )}
-                تحلیل هوشمند
+                🤖 تحلیل هوشمند
               </Button>
             ) : (
               <Button 

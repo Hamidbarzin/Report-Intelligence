@@ -196,7 +196,39 @@ export default function ReportPage() {
         </Card>
       )}
 
-      <ReportView report={reportState} />
+      {/* محتوای اصلی گزارش */}
+      {report.content && (
+        <Card className="mb-6">
+          <CardContent className="p-6">
+            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+              <FileText className="h-5 w-5" />
+              📋 محتوای گزارش
+            </h3>
+            <div 
+              className="prose prose-slate max-w-none dark:prose-invert"
+              dangerouslySetInnerHTML={{ __html: report.content }}
+            />
+          </CardContent>
+        </Card>
+      )}
+
+      {/* اگر محتوا خالی است */}
+      {!report.content && (
+        <Card className="mb-6">
+          <CardContent className="p-6 text-center">
+            <div className="action-urgent bg-red-50 border border-red-200 rounded-lg p-6">
+              <AlertTriangle className="h-8 w-8 text-red-500 mx-auto mb-3" />
+              <h3 className="text-lg font-semibold text-red-800 mb-2">⚠️ محتوا یافت نشد</h3>
+              <p className="text-red-600 mb-4">محتوای فایل HTML به درستی استخراج نشده است.</p>
+              <div className="text-sm text-red-500 space-y-1">
+                <p>• بررسی کنید فایل HTML به درستی آپلود شده باشد</p>
+                <p>• Encoding فایل باید UTF-8 باشد</p>
+                <p>• فایل نباید خراب یا ناقص باشد</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Floating Action Button */}
       <FloatingActionButton
