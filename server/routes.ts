@@ -244,46 +244,61 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "No files to analyze" });
       }
 
-      // Extract text from all files by re-processing them
+      // Use saved extracted text if available, otherwise extract from files
       let corpus = `Report Title: ${report.title}\n\n`;
-      let extractedTexts = [];
+      
+      if (report.extracted_text) {
+        console.log("Using saved extracted text");
+        corpus = report.extracted_text;
+      } else {
+        console.log("No saved text found, extracting from files...");
+        let extractedTexts = [];
 
-      // Process each file to extract text content
-      for (const fileItem of report.files) {
-        try {
-          // Fetch the file from storage - handle both old uploads/ and new objects/ URLs
-          let fileName = fileItem.url;
-          if (fileName.startsWith('/uploads/')) {
-            fileName = fileName.replace('/uploads/', '');
-          } else if (fileName.startsWith('/objects/')) {
-            fileName = fileName.replace('/objects/', '');
-          } else if (fileName.startsWith('uploads/')) {
-            fileName = fileName.replace('uploads/', '');
-          }
-          
-          const fileBuffer = await fileStorage.getFile(fileName);
-          if (fileBuffer) {
-            // Create a mock file object for text extraction
-            const mockFile = {
-              buffer: fileBuffer,
-              originalname: fileItem.file_name,
-              mimetype: fileItem.type === 'html' ? 'text/html' : fileItem.type
-            } as Express.Multer.File;
+        // Process each file to extract text content
+        for (const fileItem of report.files) {
+          try {
+            // Fetch the file from storage - handle both old uploads/ and new objects/ URLs
+            let fileName = fileItem.url;
+            if (fileName.startsWith('/uploads/')) {
+              fileName = fileName.replace('/uploads/', '');
+            } else if (fileName.startsWith('/objects/')) {
+              fileName = fileName.replace('/objects/', '');
+            } else if (fileName.startsWith('uploads/')) {
+              fileName = fileName.replace('uploads/', '');
+            }
+            
+            console.log(`Fetching file: ${fileName}`);
+            const fileBuffer = await fileStorage.getFile(fileName);
+            if (fileBuffer) {
+              // Create a mock file object for text extraction
+              const mockFile = {
+                buffer: fileBuffer,
+                originalname: fileItem.file_name,
+                mimetype: fileItem.type === 'html' ? 'text/html' : fileItem.type
+              } as Express.Multer.File;
 
-            const extractedText = await extractText(mockFile);
-            extractedTexts.push(`File: ${fileItem.file_name}\n${extractedText}`);
-          } else {
-            // Fallback to metadata if file can't be retrieved
-            extractedTexts.push(`File: ${fileItem.file_name} (${fileItem.type})\n[File content not accessible for analysis]\n`);
+              const extractedText = await extractText(mockFile);
+              extractedTexts.push(`File: ${fileItem.file_name}\n${extractedText}`);
+              console.log(`Extracted ${extractedText.length} characters from ${fileItem.file_name}`);
+            } else {
+              console.warn(`File not found: ${fileName}`);
+              // Fallback to metadata if file can't be retrieved
+              extractedTexts.push(`File: ${fileItem.file_name} (${fileItem.type})\n[File content not accessible for analysis]\n`);
+            }
+          } catch (error) {
+            console.error(`Failed to extract text from ${fileItem.file_name}:`, error);
+            // Continue with other files
+            extractedTexts.push(`File: ${fileItem.file_name} (${fileItem.type})\n[Text extraction failed]\n`);
           }
-        } catch (error) {
-          console.error(`Failed to extract text from ${fileItem.file_name}:`, error);
-          // Continue with other files
-          extractedTexts.push(`File: ${fileItem.file_name} (${fileItem.type})\n[Text extraction failed]\n`);
         }
-      }
 
-      corpus += extractedTexts.join('\n\n');
+        corpus = `Report Title: ${report.title}\n\n${extractedTexts.join('\n\n')}`;
+        
+        // Save the extracted text for future use
+        await storage.updateReport(reportId, {
+          extracted_text: corpus
+        });
+      }
 
       if (!corpus.trim()) {
         return res.status(400).json({ message: "No text content available for analysis" });
