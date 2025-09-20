@@ -76,12 +76,19 @@ export function serveStatic(app: Express) {
     );
   }
 
-  // Only serve static files for non-API routes
+  // Serve static files only for non-API routes
   app.use((req, res, next) => {
     if (req.path.startsWith("/api")) {
       return next();
     }
-    express.static(distPath)(req, res, next);
+    
+    // Check if it's a static file request
+    const filePath = path.join(distPath, req.path);
+    if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
+      return res.sendFile(filePath);
+    }
+    
+    next();
   });
 
   // fall through to index.html if the file doesn't exist (but not for API routes)
