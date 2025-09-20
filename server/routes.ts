@@ -38,9 +38,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use(cookieParser());
 
   // Serve in-memory uploaded files
-  app.get("/uploads/*", async (req, res) => {
+  app.get("/uploads/:fileName(*)", async (req, res) => {
     try {
-      const fileName = req.params[0] || "";
+      const fileName = req.params.fileName || "";
       const buffer = await fileStorage.getFile(fileName);
 
       if (!buffer) {

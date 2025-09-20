@@ -20,7 +20,7 @@ export interface IFileStorage {
 
 export class DatabaseStorage implements IStorage {
   async createReport(report: InsertReport): Promise<Report> {
-    const [created] = await db.insert(reports).values(report).returning();
+    const [created] = await db.insert(reports).values([report]).returning();
     return created;
   }
 
@@ -71,6 +71,8 @@ export class MemStorage implements IStorage {
       id: this.nextId++,
       upload_date: now,
       updated_at: now,
+      files: [] as FileItem[],
+      status: "uploaded" as const,
       ...report
     };
     this.reports.set(newReport.id, newReport);
