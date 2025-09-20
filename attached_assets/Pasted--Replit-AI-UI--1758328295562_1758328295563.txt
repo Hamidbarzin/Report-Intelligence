@@ -1,0 +1,339 @@
+باشه—بیخیال Replit AI. اینجا کد آمادهٔ کپی‌پیست می‌دم که همون ۴ خروجی رو بیاره و توی UI یک دکمهٔ “تحلیل خودکار (AI)” داشته باشه. فقط این سه فایل را اضافه کن و بعد در صفحه‌ی نمایش گزارش، این کامپوننت را صدا بزن. (بدون هیچ کتابخانه‌ی اضافه؛ اگر Recharts داری، نمودارها هم می‌آیند. اگر نداشتی، بعداً npm i recharts بزن.)
+
+1) src/lib/sampleAnalysis.js
+// نمونه خروجی AI برای زمانی که کلید/بک‌اند نداری
+export const sampleAiJson = {
+  report_id: "seed",
+  timeframe: { start: "2025-08-15", end: "2025-09-15" },
+  kpis: [
+    { name: "Orders", value: 120, unit: "",   target: 150,   delta: 15 },
+    { name: "On-time %", value: 92, unit: "%", target: 95,    delta: 3 },
+    { name: "Revenue", value: 42000, unit: "CAD", target: 50000, delta: 8000 }
+  ],
+  trend_summary: "Growth in orders and revenue; slight gap to targets.",
+  insights: [
+    { type: "win",  text: "Same-day delivery uptake rose 18%" },
+    { type: "risk", text: "Driver availability on weekends is tight" }
+  ],
+  score: 82,
+  charts: [
+    { title: "Orders per week", type: "line", series: [
+      { name: "Orders", points: [
+        { x: "2025-08-18", y: 22 },
+        { x: "2025-08-25", y: 27 },
+        { x: "2025-09-01", y: 31 },
+        { x: "2025-09-08", y: 40 }
+      ]}
+    ]},
+    { title: "Revenue", type: "bar", series: [
+      { name: "CAD", points: [
+        { x: "2025-08-18", y: 9000 },
+        { x: "2025-08-25", y: 10000 },
+        { x: "2025-09-01", y: 11000 },
+        { x: "2025-09-08", y: 12000 }
+      ]}
+    ]}
+  ],
+  next_month_plan: {
+    focus_themes: ["On-time rate", "B2B partnerships", "Cost per delivery"],
+    weekly_plan: [
+      { week: 1, goals: ["Audit late routes", "Pilot SMS ETA"], metrics: ["late%", "ETA open%"], owner: "Ops" },
+      { week: 2, goals: ["Sign 2 partners", "Bundle pricing"], metrics: ["partners", "ARPU"], owner: "Sales" },
+      { week: 3, goals: ["Optimize dispatch"], metrics: ["cost/stop", "utilization%"], owner: "Ops" },
+      { week: 4, goals: ["Review targets", "QBR deck"], metrics: ["score", "target gap"], owner: "Exec" }
+    ],
+    milestones: [{ title: "2 B2B contracts", due: "2025-10-10" }],
+    risks_mitigations: [{ risk: "Weekend capacity", mitigation: "Hire 2 PT drivers" }]
+  }
+};
+
+export const sampleMarkdown = `
+### Executive Summary
+- Orders and revenue are growing.
+- On-time rate close to target; needs attention.
+- Opportunities in B2B partnerships and dispatch optimization.
+
+**Top Wins**
+- Same-day delivery uptake +18%.
+
+**Key Risks**
+- Weekend driver capacity.
+`;
+
+2) src/lib/miniMarkdown.js
+// مبدل خیلی سادهٔ Markdown → HTML برای نمایش خلاصه مدیریتی (بدون کتابخانه)
+export function miniMD(md = "") {
+  let html = md
+    .replace(/^### (.*)$/gmi, '<h3 class="text-lg font-bold mb-2">$1</h3>')
+    .replace(/^## (.*)$/gmi,  '<h2 class="text-xl font-bold mb-2">$1</h2>')
+    .replace(/^\- (.*)$/gmi,  '<li>$1</li>')
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\n{2,}/g, '</p><p>')
+    .replace(/\n/g, '<br/>');
+  // لیست‌ها را داخل <ul> بگذار
+  html = html.replace(/(<li>[\s\S]*?<\/li>)/g, '<ul class="list-disc pr-5 space-y-1">$1</ul>');
+  return `<p>${html}</p>`;
+}
+
+3) src/components/AIAnalyzeTabs.jsx
+import React, { useState } from "react";
+import { miniMD } from "../lib/miniMarkdown";
+import { sampleAiJson, sampleMarkdown } from "../lib/sampleAnalysis";
+
+// اگر recharts نصب بود، از آن استفاده می‌کنیم؛ در غیر این صورت graceful fallback
+let Recharts = null;
+try { Recharts = require("recharts"); } catch (_) { Recharts = null; }
+// helper برای آماده‌سازی دادهٔ recharts
+const toRecharts = (series) =>
+  series.map(s => ({
+    name: s.name,
+    data: s.points.map(p => ({ x: p.x, y: p.y }))
+  }));
+
+export default function AIAnalyzeTabs({ report, onUpdate }) {
+  const [loading, setLoading] = useState(false);
+  const ai = report?.ai_json || null;
+  const md = report?.ai_markdown || "";
+
+  const runAnalyze = async () => {
+    try {
+      setLoading(true);
+      // اگر بک‌اند داری، این fetch را فعال کن:
+      // const res = await fetch('/api/analyze', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ reportId: report.id }) });
+      // const out = await res.json();
+
+      // بدون بک‌اند: دادهٔ نمونه
+      const out = { ok: true, ai_json: sampleAiJson, ai_markdown: sampleMarkdown };
+
+      const updated = { ...report, ai_json: out.ai_json, ai_markdown: out.ai_markdown, score: out.ai_json?.score ?? null };
+      onUpdate ? onUpdate(updated) : console.log("UPDATE report:", updated);
+    } catch (e) {
+      alert("خطا در تحلیل: " + (e?.message || e));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div dir="rtl" className="mt-4">
+      {!ai && (
+        <button
+          onClick={runAnalyze}
+          disabled={loading}
+          className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white shadow disabled:opacity-60"
+        >
+          {loading ? "در حال تحلیل..." : "تحلیل خودکار (AI)"}
+        </button>
+      )}
+
+      {ai && (
+        <div className="mt-4">
+          {/* تب‌ها */}
+          <Tabs>
+            <Tab title="خلاصه مدیریتی">
+              <div
+                className="prose prose-invert max-w-none"
+                dangerouslySetInnerHTML={{ __html: miniMD(md) }}
+              />
+            </Tab>
+
+            <Tab title="KPI + روند + امتیاز">
+              <KPIsView ai={ai} />
+            </Tab>
+
+            <Tab title="نمودارها">
+              {Recharts ? <ChartsView ai={ai} /> : <p className="text-slate-300">
+                برای نمودارها <code>recharts</code> نصب کن: <code>npm i recharts</code>
+              </p>}
+            </Tab>
+
+            <Tab title="برنامه یک‌ماهه">
+              <PlanView plan={ai.next_month_plan} />
+            </Tab>
+          </Tabs>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ---------- تب‌ها ---------- */
+function Tabs({ children }) {
+  const [i, setI] = useState(0);
+  const tabs = React.Children.toArray(children);
+  return (
+    <div>
+      <div className="flex gap-2 border-b border-slate-700">
+        {tabs.map((t, idx) => (
+          <button key={idx}
+            className={`px-3 py-2 text-sm rounded-t-lg ${i===idx ? 'bg-slate-700 text-white' : 'text-slate-300 hover:text-white'}`}
+            onClick={() => setI(idx)}>
+            {t.props.title}
+          </button>
+        ))}
+      </div>
+      <div className="p-4 bg-slate-800 rounded-b-xl border border-slate-700">
+        {tabs[i]}
+      </div>
+    </div>
+  );
+}
+function Tab({ children }) { return <div>{children}</div>; }
+
+/* ---------- KPI + Score ---------- */
+function KPIsView({ ai }) {
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-wrap items-center gap-3">
+        <span className="text-slate-300">امتیاز پیشرفت:</span>
+        <span className="px-3 py-1 rounded-full bg-emerald-600 text-white font-bold text-lg">
+          {ai.score ?? 0}/100
+        </span>
+      </div>
+
+      <p className="text-slate-300">{ai.trend_summary}</p>
+
+      <div className="grid md:grid-cols-3 gap-3">
+        {ai.kpis?.map((k, idx) => (
+          <div key={idx} className="bg-slate-700 rounded-xl p-4 border border-slate-600">
+            <div className="text-slate-300 text-sm">{k.name}</div>
+            <div className="text-2xl font-bold text-white">
+              {k.value} {k.unit || ""}
+            </div>
+            <div className="text-sm text-slate-300">
+              هدف: {k.target ?? "-"}
+            </div>
+            <div className={`text-sm ${k.delta >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+              {k.delta >= 0 ? '▲' : '▼'} تغییر: {k.delta}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {ai.insights?.length ? (
+        <div>
+          <div className="text-slate-200 font-semibold mb-2">نکات کلیدی</div>
+          <ul className="list-disc pr-5 text-slate-300 space-y-1">
+            {ai.insights.map((x, i) => <li key={i}><span className="opacity-70">[{x.type}]</span> {x.text}</li>)}
+          </ul>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
+/* ---------- نمودارها ---------- */
+function ChartsView({ ai }) {
+  const { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } = Recharts;
+  return (
+    <div className="grid md:grid-cols-2 gap-4">
+      {ai.charts?.map((c, idx) => {
+        const series = toRecharts(c.series);
+        const data = series[0]?.data ?? [];
+        if (c.type === 'line') {
+          return (
+            <div key={idx} className="h-72 bg-slate-700 rounded-xl p-3">
+              <div className="text-slate-200 mb-2">{c.title}</div>
+              <ResponsiveContainer width="100%" height="90%">
+                <LineChart data={data}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="x" /><YAxis /><Tooltip /><Legend />
+                  <Line type="monotone" dataKey="y" name={series[0]?.name || 'Series'} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
+          );
+        }
+        if (c.type === 'bar') {
+          return (
+            <div key={idx} className="h-72 bg-slate-700 rounded-xl p-3">
+              <div className="text-slate-200 mb-2">{c.title}</div>
+              <ResponsiveContainer width="100%" height="90%">
+                <BarChart data={data}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="x" /><YAxis /><Tooltip /><Legend />
+                  <Bar dataKey="y" name={series[0]?.name || 'Series'} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          );
+        }
+        // pie یا سایر انواع را ساده رد می‌کنیم
+        return null;
+      })}
+    </div>
+  );
+}
+
+/* ---------- برنامه یک‌ماهه ---------- */
+function PlanView({ plan }) {
+  if (!plan) return <p className="text-slate-300">برنامه موجود نیست.</p>;
+  return (
+    <div className="space-y-4">
+      <div>
+        <div className="text-slate-200 font-semibold mb-2">تم‌های تمرکز</div>
+        <ul className="list-disc pr-5 text-slate-300 space-y-1">
+          {plan.focus_themes?.map((t,i)=><li key={i}>{t}</li>)}
+        </ul>
+      </div>
+
+      <div>
+        <div className="text-slate-200 font-semibold mb-2">برنامه هفتگی</div>
+        <div className="grid md:grid-cols-2 gap-3">
+          {plan.weekly_plan?.map((w,i)=>(
+            <div key={i} className="bg-slate-700 rounded-xl p-4 border border-slate-600">
+              <div className="text-white font-bold mb-1">هفته {w.week}</div>
+              <div className="text-slate-300 text-sm mb-2">مسئول: {w.owner || "-"}</div>
+              <div className="text-slate-300"><span className="font-semibold">اهداف:</span>
+                <ul className="list-disc pr-5">{w.goals?.map((g,j)=><li key={j}>{g}</li>)}</ul>
+              </div>
+              <div className="text-slate-300 mt-2"><span className="font-semibold">متریک‌ها:</span>
+                <ul className="list-disc pr-5">{w.metrics?.map((m,j)=><li key={j}>{m}</li>)}</ul>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-3">
+        <div>
+          <div className="text-slate-200 font-semibold mb-2">مایلستون‌ها</div>
+          <ul className="list-disc pr-5 text-slate-300 space-y-1">
+            {plan.milestones?.map((m,i)=><li key={i}>{m.title} – <span className="opacity-80">{m.due}</span></li>)}
+          </ul>
+        </div>
+        <div>
+          <div className="text-slate-200 font-semibold mb-2">ریسک‌ها/راهکارها</div>
+          <ul className="list-disc pr-5 text-slate-300 space-y-1">
+            {plan.risks_mitigations?.map((r,i)=><li key={i}><span className="opacity-80">{r.risk}</span> → {r.mitigation}</li>)}
+          </ul>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+طرز استفاده (خیلی سریع)
+
+سه فایل بالا را بساز.
+
+هرجا در پنل ادمین «نمایش یک گزارش» داری (مثلاً ReportPage.jsx یا ManageReports وقتی روی یک آیتم کلیک می‌کنی)، این را رندر کن:
+
+import AIAnalyzeTabs from "@/components/AIAnalyzeTabs";
+
+// فرض: selectedReport آبجکت گزارش انتخاب‌شده است
+<AIAnalyzeTabs
+  report={selectedReport}
+  onUpdate={(updated) => {
+    // همینجا می‌تونی در DB هم ذخیره کنی؛ یا فعلاً فقط state را آپدیت کن
+    setSelectedReport(updated);
+  }}
+/>
+
+
+اگر نمودارها نیامد، نصب کن:
+
+npm i recharts
+
+
+همین الان با دکمه‌ی «تحلیل خودکار (AI)» داده‌ی نمونه می‌آید و ۴ تب کامل نمایش داده می‌شود. بعداً اگر خواستی واقعاً به بک‌اند وصل شود، فقط داخل تابع runAnalyze به‌جای داده‌ی نمونه، fetch('/api/analyze') را فعال کن.
