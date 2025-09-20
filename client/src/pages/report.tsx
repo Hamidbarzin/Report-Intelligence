@@ -90,6 +90,9 @@ export default function ReportPage() {
 
   const analysisData = report.ai_json ? jsonSafeParse(JSON.stringify(report.ai_json)) : null;
   const hasAnalysis = analysisData && report.ai_markdown;
+  
+  // Check if user is admin to show analyze button
+  const isAdmin = document.cookie.includes('ri_admin');
 
   const getFileIcon = (type: string) => {
     switch (type) {
@@ -140,18 +143,19 @@ export default function ReportPage() {
             <Badge variant="secondary">
               {report.status === "published" ? "Published" : "Draft"}
             </Badge>
-            {!hasAnalysis && (
+            {isAdmin && (
               <Button
                 onClick={() => analyzeMutation.mutate()}
                 disabled={analyzeMutation.isPending}
                 className="flex items-center gap-2"
+                variant={hasAnalysis ? "outline" : "default"}
               >
                 {analyzeMutation.isPending ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
                   <Brain className="h-4 w-4" />
                 )}
-                Analyze with AI
+                {hasAnalysis ? "Re-analyze with AI" : "Analyze with AI"}
               </Button>
             )}
           </div>
