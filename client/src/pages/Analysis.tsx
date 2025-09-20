@@ -9,15 +9,9 @@ import { Calendar, Search, Filter, BarChart3, TrendingUp, FileText, Clock, Star 
 import { Link } from "wouter";
 import { format } from "date-fns";
 
-interface AnalysisReport {
-  id: number;
-  title: string;
-  upload_date: string;
-  status: string;
-  score?: string;
-  ai_json?: any;
-  ai_markdown?: string;
-}
+import { ReportType } from "@shared/schema";
+
+type AnalysisReport = Pick<ReportType, 'id' | 'title' | 'upload_date' | 'status' | 'score' | 'ai_json' | 'ai_markdown'>;
 
 export default function AnalysisPage() {
   const [searchTerm, setSearchTerm] = useState("");

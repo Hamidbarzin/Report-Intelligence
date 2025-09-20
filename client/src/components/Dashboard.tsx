@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ReportCard } from "./ReportCard";
 import { Search, SortDesc, FileText, TrendingUp, Calendar, Brain } from "lucide-react";
 import { getPublishedReports } from "@/lib/api";
-import type { Report } from "@shared/schema";
+import type { ReportType } from "@shared/schema";
 
 export function Dashboard() {
   const [searchQuery, setSearchQuery] = useState("");

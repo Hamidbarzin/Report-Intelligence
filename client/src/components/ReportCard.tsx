@@ -2,10 +2,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Star, Clock, ArrowRight, FileText, Image, Globe } from "lucide-react";
 import { Link } from "wouter";
-import type { Report } from "@shared/schema";
+import type { ReportType } from "@shared/schema";
 
 interface ReportCardProps {
-  report: Report;
+  report: ReportType;
 }
 
 export function ReportCard({ report }: ReportCardProps) {

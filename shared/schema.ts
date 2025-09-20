@@ -20,13 +20,13 @@ export const reports = pgTable("reports", {
   is_published: boolean("is_published").default(false).notNull()
 });
 
-export interface FileItem {
-  type: "html" | "pdf" | "image";
-  url: string;
+export type FileItem = {
   file_name: string;
   size_kb: number;
+  type: string;
+  url: string;
   extracted_text?: string;
-}
+};
 
 export interface KPI {
   name: string;
@@ -86,6 +86,24 @@ export const updateReportSchema = insertReportSchema.partial();
 export type InsertReport = z.infer<typeof insertReportSchema>;
 export type Report = typeof reports.$inferSelect;
 export type UpdateReport = z.infer<typeof updateReportSchema>;
+
+// Explicit Report type for better type safety
+export type ReportType = {
+  id: number;
+  title: string;
+  upload_date: Date;
+  size_kb: string;
+  extracted_date?: string | null;
+  extracted_text?: string | null;
+  status: "uploaded" | "analyzed" | "published";
+  content_url?: string | null;
+  files: FileItem[];
+  ai_json?: AIAnalysis | null;
+  ai_markdown?: string | null;
+  score?: string | null;
+  updated_at: Date;
+  is_published: boolean;
+};
 
 // Auth schemas
 export const loginSchema = z.object({
