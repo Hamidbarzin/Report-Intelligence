@@ -129,7 +129,7 @@ export function FileUploader({ onUploadComplete }: FileUploaderProps) {
             </div>
             <div>
               <h3 className="text-lg font-medium">Drop files here or click to upload</h3>
-              <p className="text-muted-foreground">Supports PDF, HTML, and image files (JPG, PNG)</p>
+              <p className="text-muted-foreground">فقط فایل‌های HTML پذیرفته می‌شوند</p>
               <p className="text-sm text-muted-foreground">Maximum file size: 20MB per file</p>
             </div>
             <Button asChild>
@@ -138,7 +138,7 @@ export function FileUploader({ onUploadComplete }: FileUploaderProps) {
                 <input
                   type="file"
                   multiple
-                  accept=".pdf,.html,.htm,.jpg,.jpeg,.png"
+                  accept=".html,.htm"
                   onChange={handleFileSelect}
                   className="hidden"
                   data-testid="input-file-select"

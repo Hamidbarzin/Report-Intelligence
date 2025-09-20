@@ -23,17 +23,13 @@ const upload = multer({
   },
   fileFilter: (req, file, cb) => {
     const allowedTypes = [
-      "text/html",
-      "application/pdf",
-      "image/jpeg",
-      "image/jpg",
-      "image/png"
+      "text/html"
     ];
 
     if (allowedTypes.includes(file.mimetype)) {
       cb(null, true);
     } else {
-      cb(new Error("Unsupported file type"));
+      cb(new Error("فقط فایل‌های HTML پذیرفته می‌شوند"));
     }
   }
 });
