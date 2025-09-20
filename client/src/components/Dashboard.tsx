@@ -15,8 +15,12 @@ export function Dashboard() {
   const [filterBy, setFilterBy] = useState("all");
 
   const { data: reports = [], isLoading, error } = useQuery({
-    queryKey: ["/api/list"],
-    queryFn: getPublishedReports
+    queryKey: ["/api/reports"],
+    queryFn: async () => {
+      const response = await fetch("/api/reports");
+      if (!response.ok) throw new Error("Failed to fetch reports");
+      return response.json();
+    }
   });
 
   const filteredReports = reports.filter((report: Report) => {
